@@ -94,7 +94,7 @@ jobs:
       environments: ${{ steps.discover.outputs.environments }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Discover modules and environments
         id: discover
@@ -109,7 +109,7 @@ jobs:
     needs: discover
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
         uses: ./.github/actions/setup-terraform
@@ -136,7 +136,7 @@ jobs:
 
       - name: Upload static report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: static-analysis-report-${{ github.run_id }}
           path: tests/reports/static-summary.md
@@ -153,7 +153,7 @@ jobs:
         module: ${{ fromJson(needs.discover.outputs.modules) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
         uses: ./.github/actions/setup-terraform
@@ -176,7 +176,7 @@ jobs:
         environment: ${{ fromJson(needs.discover.outputs.environments) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
         uses: ./.github/actions/setup-terraform
@@ -195,10 +195,10 @@ jobs:
     needs: discover
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@v12
+        uses: bridgecrewio/checkov-action@v12.3114.0
         with:
           directory: .
           framework: terraform
@@ -218,7 +218,7 @@ jobs:
           minimum_severity: HIGH
 
       - name: Run Trivy
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: config
           scan-ref: .
@@ -236,7 +236,7 @@ jobs:
 
       - name: Upload security reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: security-reports-${{ github.run_id }}
           path: tests/reports/
@@ -249,7 +249,7 @@ jobs:
     needs: discover
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Run compliance tests
         run: |
@@ -258,7 +258,7 @@ jobs:
 
       - name: Upload compliance report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: compliance-report-${{ github.run_id }}
           path: tests/reports/compliance-summary.md
@@ -274,7 +274,7 @@ jobs:
       - validate-environments
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
         uses: ./.github/actions/setup-terraform
@@ -307,7 +307,7 @@ jobs:
         environment: ${{ fromJson(needs.discover.outputs.environments) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
         uses: ./.github/actions/setup-terraform
@@ -325,7 +325,7 @@ jobs:
 
       - name: Upload plan reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: plan-report-${{ matrix.environment }}-${{ github.run_id }}
           path: |
@@ -349,7 +349,7 @@ jobs:
     if: always()
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -377,7 +377,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload framework reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: terraform-test-framework-report-${{ github.run_id }}
           path: tests/reports/

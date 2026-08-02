@@ -121,7 +121,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.resolve-inputs.outputs.git_ref }}
 
@@ -152,7 +152,7 @@ jobs:
         run: echo "sha256=$(sha256sum tfplan | awk '{print $1}')" >> "$GITHUB_OUTPUT"
 
       - name: Upload plan artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tfplan-${{ needs.resolve-inputs.outputs.promotion_target }}-${{ github.run_id }}
           path: |
@@ -184,7 +184,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.resolve-inputs.outputs.git_ref }}
 
@@ -195,7 +195,7 @@ jobs:
           working-directory: environments/${{ needs.resolve-inputs.outputs.promotion_target }}
 
       - name: Download plan artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: tfplan-${{ needs.resolve-inputs.outputs.promotion_target }}-${{ github.run_id }}
           path: environments/${{ needs.resolve-inputs.outputs.promotion_target }}
@@ -229,7 +229,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.resolve-inputs.outputs.git_ref }}
 
@@ -253,7 +253,7 @@ jobs:
           EOF
 
       - name: Upload audit record
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: promotion-record-${{ needs.resolve-inputs.outputs.promotion_target }}-${{ github.run_id }}
           path: audit-records/
