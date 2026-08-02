@@ -1,0 +1,95 @@
+{
+  "version": "1.0.0",
+  "repository_standards": {
+    "module_required_files": [
+      "main.tf",
+      "variables.tf",
+      "outputs.tf",
+      "versions.tf",
+      "README.md"
+    ],
+    "module_forbidden_files": [
+      "providers.tf"
+    ],
+    "environment_required_files": [
+      "main.tf",
+      "variables.tf",
+      "outputs.tf",
+      "versions.tf",
+      "providers.tf",
+      "backend.tf",
+      "locals.tf"
+    ],
+    "forbidden_committed_files": [
+      "terraform.tfvars",
+      "*.auto.tfvars"
+    ],
+    "allowed_secret_examples": [
+      "terraform.tfvars.example",
+      "*.auto.tfvars.example"
+    ]
+  },
+  "terraform_best_practices": [
+    {
+      "id": "TP-001",
+      "name": "Explicit variable types",
+      "check": "variables_have_types"
+    },
+    {
+      "id": "TP-002",
+      "name": "Output descriptions",
+      "check": "outputs_have_descriptions"
+    },
+    {
+      "id": "TP-003",
+      "name": "Provider inheritance in modules",
+      "check": "modules_no_providers_tf"
+    }
+  ],
+  "azure_well_architected": [
+    {
+      "id": "WAF-SEC-001",
+      "pillar": "Security",
+      "topic": "Secrets management",
+      "validation": "no_secrets_in_source"
+    },
+    {
+      "id": "WAF-SEC-002",
+      "pillar": "Security",
+      "topic": "Least privilege",
+      "validation": "security_scanners_pass"
+    },
+    {
+      "id": "WAF-REL-001",
+      "pillar": "Reliability",
+      "topic": "Infrastructure validation",
+      "validation": "terraform_validate_pass"
+    },
+    {
+      "id": "WAF-OPS-001",
+      "pillar": "Operational Excellence",
+      "topic": "Documentation",
+      "validation": "terraform_docs_current"
+    }
+  ],
+  "azure_caf": [
+    {
+      "id": "CAF-GOV-001",
+      "domain": "Governance",
+      "topic": "Policy as code",
+      "validation": "checkov_pass"
+    },
+    {
+      "id": "CAF-GOV-002",
+      "domain": "Governance",
+      "topic": "Resource organization",
+      "validation": "naming_module_present"
+    },
+    {
+      "id": "CAF-SEC-001",
+      "domain": "Security",
+      "topic": "Secure configuration",
+      "validation": "tfsec_trivy_pass"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+name: Run Test Suite
+description: Execute the repository Terraform testing framework.
+
+inputs:
+  suite:
+    description: Test suite to run (all, static, modules, environments, security, compliance, plan, regression).
+    required: false
+    default: regression
+  environment:
+    description: Target environment for plan suite.
+    required: false
+    default: dev
+  with-plan:
+    description: Include plan validation.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Make test scripts executable
+      shell: bash
+      run: chmod +x tests/scripts/*.sh tests/scripts/lib/*.sh tests/unit/*.sh tests/integration/*.sh
+
+    - name: Run test suite
+      shell: bash
+      run: |
+        args=(--suite "${{ inputs.suite }}")
+        if [[ "${{ inputs.with-plan }}" == "true" ]]; then
+          args+=(--with-plan)
+        fi
+        if [[ -n "${{ inputs.environment }}" && "${{ inputs.suite }}" == "plan" ]]; then
+          args+=(--env "${{ inputs.environment }}")
+        fi
+        ./tests/scripts/run-all.sh "${args[@]}"
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports-${{ inputs.suite }}-${{ github.run_id }}
+        path: tests/reports/
+        retention-days: 14
+        if-no-files-found: ignore

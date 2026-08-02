@@ -34,7 +34,7 @@ Configured exclusively in `environments/*/providers.tf`:
 | `random` | `hashicorp/random` | `~> 3.6` | Random values |
 | `time` | `hashicorp/time` | `~> 0.12` | Time-based resources |
 
-Authentication is **not** configured in provider blocks. CI/CD will use GitHub Actions OIDC in a later phase.
+Authentication uses **GitHub Actions OIDC** with federated credentials per environment. Configure secrets on each GitHub Environment (`dev`, `stage`, `prod`) as documented in [CI/CD Architecture](docs/cicd/README.md).
 
 ## Repository Structure
 
@@ -63,6 +63,7 @@ Authentication is **not** configured in provider blocks. CI/CD will use GitHub A
 │   ├── checklists/       # Pre-promotion checklists
 │   └── templates/        # Audit records, release notes, change requests
 ├── modules/              # Reusable Terraform modules
+├── tests/                # Terraform testing framework
 ├── scripts/              # Operational scripts
 ├── examples/             # Reference implementations
 ├── policies/             # Azure Policy definitions
@@ -144,8 +145,8 @@ Full reference: [Terraform Standards](docs/terraform/standards.md)
 | `container-app-environment` | Azure Container Apps environment |
 | `container-app` | Azure Container Apps |
 | `postgresql-flexible-server` | Azure Database for PostgreSQL Flexible Server |
-| `postgres` | _(placeholder — use `postgresql-flexible-server`)_ |
-| `redis` | Azure Cache for Redis |
+| `postgresql-database` | PostgreSQL database provisioning |
+| `postgresql-configuration` | PostgreSQL server configuration |
 | `log-analytics` | Log Analytics Workspace (centralized logging platform) |
 | `application-insights` | Application Insights |
 | `role-assignment` | Azure RBAC role assignments |
@@ -153,9 +154,18 @@ Full reference: [Terraform Standards](docs/terraform/standards.md)
 | `diagnostic-settings` | Azure Monitor diagnostic settings |
 | `action-group` | Azure Monitor action groups |
 | `monitor-alerts` | Azure Monitor metric alert rules |
-| `monitor` | _(placeholder — use `diagnostic-settings`, `action-group`, `monitor-alerts`)_ |
-| `alerts` | _(placeholder — superseded by `action-group` and `monitor-alerts`)_ |
 | `budget` | Cost management and budgets |
+
+### Deprecated modules
+
+The following modules are **deprecated** and must not be used in new compositions. See `DEPRECATED.md` in each module directory.
+
+| Module | Replacement |
+|--------|-------------|
+| `postgres` | `postgresql-flexible-server` |
+| `monitor` | `diagnostic-settings`, `action-group`, `monitor-alerts` |
+| `alerts` | `action-group`, `monitor-alerts` |
+| `redis` | Not implemented |
 
 ## Getting Started
 

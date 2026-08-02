@@ -49,6 +49,8 @@ jobs:
       matrix:
         environment: ${{ fromJson(needs.resolve-environments.outputs.environments) }}
 
+    environment: ${{ matrix.environment }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,9 +61,33 @@ jobs:
           terraform-version: ${{ env.TF_VERSION }}
           working-directory: environments/${{ matrix.environment }}
 
-      - name: Terraform Init
-        working-directory: environments/${{ matrix.environment }}
-        run: terraform init -backend=false -input=false
+      - name: Resolve backend mode
+        id: backend
+        run: |
+          if [[ -n "${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" && -n "${{ secrets.TF_STATE_RESOURCE_GROUP }}" ]]; then
+            echo "use_remote=true" >> "$GITHUB_OUTPUT"
+            if [[ -n "${{ secrets.TF_STATE_KEY }}" ]]; then
+              echo "state_key=${{ secrets.TF_STATE_KEY }}" >> "$GITHUB_OUTPUT"
+            else
+              echo "state_key=${{ matrix.environment }}.tfstate" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "use_remote=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Remote backend secrets not configured — drift detection cannot compare live state."
+          fi
+
+      - name: Azure Terraform Init
+        uses: ./.github/actions/azure-terraform
+        with:
+          working-directory: environments/${{ matrix.environment }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          tf-state-resource-group: ${{ secrets.TF_STATE_RESOURCE_GROUP }}
+          tf-state-storage-account: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+          tf-state-container: ${{ secrets.TF_STATE_CONTAINER }}
+          tf-state-key: ${{ steps.backend.outputs.state_key }}
+          use-remote-backend: ${{ steps.backend.outputs.use_remote }}
 
       - name: Detect drift
         id: drift
@@ -129,7 +155,13 @@ jobs:
       - name: Fail on drift (prod)
         if: steps.drift.outputs.exit_code == '2' && matrix.environment == 'prod'
         run: |
-          echo "::warning::Production drift detected. See release/runbooks/drift-recovery.md"
+          echo "::error::Production drift detected. See release/runbooks/drift-recovery.md"
+          exit 1
+
+      - name: Warn on drift (non-prod)
+        if: steps.drift.outputs.exit_code == '2' && matrix.environment != 'prod'
+        run: |
+          echo "::warning::Drift detected in ${{ matrix.environment }}. Review drift report artifact."
 
       - name: Fail on error
         if: steps.drift.outputs.exit_code == '1'

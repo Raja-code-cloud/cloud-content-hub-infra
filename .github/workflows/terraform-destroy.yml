@@ -65,26 +65,50 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate OIDC and backend secrets
+        run: |
+          missing=()
+          [[ -z "${{ secrets.AZURE_CLIENT_ID }}" ]] && missing+=("AZURE_CLIENT_ID")
+          [[ -z "${{ secrets.AZURE_TENANT_ID }}" ]] && missing+=("AZURE_TENANT_ID")
+          [[ -z "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]] && missing+=("AZURE_SUBSCRIPTION_ID")
+          [[ -z "${{ secrets.TF_STATE_RESOURCE_GROUP }}" ]] && missing+=("TF_STATE_RESOURCE_GROUP")
+          [[ -z "${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" ]] && missing+=("TF_STATE_STORAGE_ACCOUNT")
+          if [[ ${#missing[@]} -gt 0 ]]; then
+            echo "::error::Missing required GitHub Environment secrets: ${missing[*]}"
+            exit 1
+          fi
+
       - name: Setup Terraform
         uses: ./.github/actions/setup-terraform
         with:
           terraform-version: ${{ env.TF_VERSION }}
           working-directory: environments/${{ inputs.environment }}
 
-      - name: Terraform Init
-        working-directory: environments/${{ inputs.environment }}
-        run: terraform init -backend=false -input=false
-
-      - name: Terraform Destroy (disabled — OIDC pending)
-        working-directory: environments/${{ inputs.environment }}
+      - name: Resolve state key
+        id: backend
         run: |
-          echo "::warning::Destroy execution is disabled until Azure OIDC authentication is configured."
-          echo "Environment: ${{ inputs.environment }}"
-          echo "After OIDC setup, enable the destroy step below."
-          echo ""
-          echo "Planned command: terraform destroy -input=false -auto-approve -var-file=terraform.tfvars.example"
-          # Uncomment after OIDC and backend configuration:
-          # terraform destroy -input=false -auto-approve -var-file=terraform.tfvars.example
+          if [[ -n "${{ secrets.TF_STATE_KEY }}" ]]; then
+            echo "state_key=${{ secrets.TF_STATE_KEY }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "state_key=${{ inputs.environment }}.tfstate" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Azure Terraform Init
+        uses: ./.github/actions/azure-terraform
+        with:
+          working-directory: environments/${{ inputs.environment }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          tf-state-resource-group: ${{ secrets.TF_STATE_RESOURCE_GROUP }}
+          tf-state-storage-account: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+          tf-state-container: ${{ secrets.TF_STATE_CONTAINER }}
+          tf-state-key: ${{ steps.backend.outputs.state_key }}
+          use-remote-backend: "true"
+
+      - name: Terraform Destroy
+        working-directory: environments/${{ inputs.environment }}
+        run: terraform destroy -input=false -auto-approve -var-file=terraform.tfvars.example
 
       - name: Upload destroy log
         if: always()

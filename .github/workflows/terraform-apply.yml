@@ -71,6 +71,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate OIDC and backend secrets
+        run: |
+          missing=()
+          [[ -z "${{ secrets.AZURE_CLIENT_ID }}" ]] && missing+=("AZURE_CLIENT_ID")
+          [[ -z "${{ secrets.AZURE_TENANT_ID }}" ]] && missing+=("AZURE_TENANT_ID")
+          [[ -z "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]] && missing+=("AZURE_SUBSCRIPTION_ID")
+          [[ -z "${{ secrets.TF_STATE_RESOURCE_GROUP }}" ]] && missing+=("TF_STATE_RESOURCE_GROUP")
+          [[ -z "${{ secrets.TF_STATE_STORAGE_ACCOUNT }}" ]] && missing+=("TF_STATE_STORAGE_ACCOUNT")
+          if [[ ${#missing[@]} -gt 0 ]]; then
+            echo "::error::Missing required GitHub Environment secrets: ${missing[*]}"
+            echo "Configure OIDC and remote state secrets per docs/cicd/README.md"
+            exit 1
+          fi
+
       - name: Setup Terraform
         uses: ./.github/actions/setup-terraform
         with:
@@ -84,9 +98,27 @@ jobs:
           name: tfplan-${{ inputs.environment }}-${{ inputs.use_plan_artifact }}
           path: environments/${{ inputs.environment }}
 
-      - name: Terraform Init
-        working-directory: environments/${{ inputs.environment }}
-        run: terraform init -backend=false -input=false
+      - name: Resolve state key
+        id: backend
+        run: |
+          if [[ -n "${{ secrets.TF_STATE_KEY }}" ]]; then
+            echo "state_key=${{ secrets.TF_STATE_KEY }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "state_key=${{ inputs.environment }}.tfstate" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Azure Terraform Init
+        uses: ./.github/actions/azure-terraform
+        with:
+          working-directory: environments/${{ inputs.environment }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          tf-state-resource-group: ${{ secrets.TF_STATE_RESOURCE_GROUP }}
+          tf-state-storage-account: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+          tf-state-container: ${{ secrets.TF_STATE_CONTAINER }}
+          tf-state-key: ${{ steps.backend.outputs.state_key }}
+          use-remote-backend: "true"
 
       - name: Generate plan when artifact not provided
         if: inputs.use_plan_artifact == ''
@@ -98,16 +130,9 @@ jobs:
             -var-file=terraform.tfvars.example \
             -out=tfplan
 
-      - name: Terraform Apply (disabled — OIDC pending)
+      - name: Terraform Apply
         working-directory: environments/${{ inputs.environment }}
-        run: |
-          echo "::notice::Apply execution is disabled until Azure OIDC authentication is configured."
-          echo "Environment: ${{ inputs.environment }}"
-          echo "After OIDC setup, enable the apply step below."
-          echo ""
-          echo "Planned command: terraform apply -input=false -auto-approve tfplan"
-          # Uncomment after OIDC and backend configuration:
-          # terraform apply -input=false -auto-approve tfplan
+        run: terraform apply -input=false -auto-approve tfplan
 
       - name: Upload apply log
         if: always()

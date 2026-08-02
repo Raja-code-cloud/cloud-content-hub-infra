@@ -32,6 +32,11 @@ output "container_app_url" {
   value       = module.container_app.ingress_url
 }
 
+output "container_app_id" {
+  description = "Azure Resource Manager ID of the Container App."
+  value       = module.container_app.id
+}
+
 output "container_app_fqdn" {
   description = "FQDN of the latest Container App revision."
   value       = module.container_app.fqdn
@@ -86,6 +91,21 @@ output "private_networking_enabled" {
 output "private_endpoint_ids" {
   description = "Map of private endpoint keys to resource IDs when private endpoints are enabled."
   value       = local.private_endpoints_enabled ? module.private_endpoint[0].private_endpoint_ids : {}
+}
+
+output "managed_identity_resource_id" {
+  description = "Azure Resource Manager ID of the platform user-assigned managed identity."
+  value       = module.managed_identity.resource_id
+}
+
+output "virtual_network_id" {
+  description = "Virtual network resource ID when private networking is enabled."
+  value       = local.networking_enabled ? module.networking[0].vnet_id : null
+}
+
+output "subnet_ids" {
+  description = "Map of subnet keys to resource IDs when private networking is enabled."
+  value       = local.networking_enabled ? module.networking[0].subnet_ids : {}
 }
 
 output "resource_names" {

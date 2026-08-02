@@ -8,6 +8,7 @@ Bootstrap prepares the deployment toolchain and remote state backend. It does **
 
 | Step | Script | Purpose |
 |------|--------|---------|
+| 0 | `provision-state-storage.sh` | One-time Azure Storage provisioning for remote state |
 | 1 | `select-environment.sh` | Validate and export environment context |
 | 2 | `init-terraform.sh` | Download providers and modules |
 | 3 | `init-backend.sh` | Configure azurerm remote state backend |

@@ -1,0 +1,49 @@
+{
+  "version": "1.0.0",
+  "description": "Central test manifest for cloud-content-hub-infra",
+  "tools": {
+    "terraform": "1.13.0",
+    "tflint": "v0.50.3",
+    "terraform_docs": "v0.19.0"
+  },
+  "environments": [
+    {
+      "name": "dev",
+      "validate": true,
+      "plan": true,
+      "composition": true
+    },
+    {
+      "name": "stage",
+      "validate": true,
+      "plan": true,
+      "composition": true
+    },
+    {
+      "name": "prod",
+      "validate": true,
+      "plan": true,
+      "composition": true
+    }
+  ],
+  "module_discovery": {
+    "path": "modules",
+    "required_files": ["main.tf", "variables.tf", "outputs.tf", "versions.tf", "README.md"],
+    "validate_glob": "**/_schema_test.tf"
+  },
+  "plan_gates": {
+    "allow_plan_exit_codes": [0, 2],
+    "fail_on_forced_replacement": false,
+    "max_forced_replacements": 0,
+    "replacement_allowlist": []
+  },
+  "security": {
+    "minimum_severity": "HIGH",
+    "scan_paths": ["modules", "environments", "tests/fixtures"],
+    "exclude_paths": [".terraform", "examples", "tests/reports"]
+  },
+  "reporting": {
+    "output_dir": "tests/reports",
+    "retention_days": 14
+  }
+}

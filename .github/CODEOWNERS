@@ -1,0 +1,5 @@
+# Platform engineering owns all infrastructure changes.
+* @platform-engineering
+
+/environments/prod/ @platform-engineering @security-team
+/.github/workflows/ @platform-engineering

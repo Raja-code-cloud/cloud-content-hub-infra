@@ -26,9 +26,9 @@ additional_tags = {
 
 # --- Feature flags -------------------------------------------------------------
 
-enable_private_networking       = false
-enable_private_endpoints        = false
-public_network_access_enabled   = true
+enable_private_networking       = true
+enable_private_endpoints        = true
+public_network_access_enabled   = false
 enable_governance               = true
 enable_diagnostics              = true
 enable_monitoring               = true

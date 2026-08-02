@@ -130,7 +130,7 @@ flowchart TD
 | Application Insights | 50% sampling | 25% sampling |
 | ACR SKU | Basic | Standard |
 | Key Vault | Purge protection off | Purge protection on |
-| PostgreSQL | Burstable B1ms, 32 GB | GP D2s_v3, 64 GB, 14-day backup |
+| PostgreSQL | Burstable B1ms, 32 GB | Burstable B2ms, 64 GB, 14-day backup |
 | PostgreSQL extras | Server only | Database + configuration modules |
 | Storage | Account only | Account + blob containers |
 | Container App | Scale 0–3, `latest` tag | Scale 1–5, pinned `stage` tag |

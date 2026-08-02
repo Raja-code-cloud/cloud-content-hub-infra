@@ -3,12 +3,12 @@
 # ------------------------------------------------------------------------------
 
 output "secret_ids" {
-  description = "Map of secret keys to versioned Key Vault secret resource IDs."
-  value       = { for key, secret in azurerm_key_vault_secret.this : key => secret.id }
+  description = "Map of secret keys to versioned Key Vault secret ARM resource IDs."
+  value       = { for key, secret in azurerm_key_vault_secret.this : key => secret.resource_id }
 }
 
 output "secret_uris" {
-  description = "Map of secret keys to versioned Key Vault secret URIs."
+  description = "Map of secret keys to versioned Key Vault secret URIs (https://{vault}.vault.azure.net/secrets/{name}/{version})."
   value       = { for key, secret in azurerm_key_vault_secret.this : key => secret.id }
 }
 

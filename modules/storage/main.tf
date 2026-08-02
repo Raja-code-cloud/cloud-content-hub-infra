@@ -21,6 +21,16 @@ resource "azurerm_storage_account" "this" {
   public_network_access_enabled     = var.public_network_access_enabled
   infrastructure_encryption_enabled = var.infrastructure_encryption_enabled
   tags                              = var.tags
+
+  dynamic "network_rules" {
+    for_each = var.network_rules != null ? [var.network_rules] : []
+    content {
+      default_action             = network_rules.value.default_action
+      bypass                     = network_rules.value.bypass
+      ip_rules                   = network_rules.value.ip_rules
+      virtual_network_subnet_ids = network_rules.value.virtual_network_subnet_ids
+    }
+  }
 }
 
 check "file_storage_requires_premium" {

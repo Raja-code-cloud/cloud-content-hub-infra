@@ -119,6 +119,17 @@ module "postgresql_flexible_server" {
   storage_mb = 32768
 }
 
+module "postgresql_database" {
+  source = "../../modules/postgresql-database"
+
+  server_id   = module.postgresql_flexible_server.id
+  server_name = module.postgresql_flexible_server.name
+  tags        = module.common.tags
+  databases   = local.postgresql_databases
+
+  depends_on = [module.postgresql_flexible_server]
+}
+
 # --- Compute Platform ----------------------------------------------------------
 
 module "container_app_environment" {

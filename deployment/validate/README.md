@@ -39,12 +39,17 @@ terraform fmt ──▶ terraform validate ──▶ tflint ──▶ checkov �
 ## Run All Validations
 
 ```bash
-# Full suite (requires tools installed)
-./deployment/scripts/validate/run-all.sh dev
+# Full test framework (recommended)
+./tests/scripts/run-all.sh
 
-# Validate-only (no backend, no security tools)
-./deployment/scripts/validate/run-all.sh dev --skip-backend --skip-security
+# Full regression with plan validation
+./tests/scripts/run-all.sh --suite regression --with-plan --env dev
+
+# Legacy deployment entry point (delegates to tests framework)
+./deployment/scripts/validate/run-all.sh dev
 ```
+
+See [tests/README.md](../../tests/README.md) for the complete testing framework.
 
 ## Individual Commands
 
@@ -158,6 +163,7 @@ git diff --exit-code modules/<module>/README.md
 
 ## Related
 
+- [Terraform Test Framework](../../tests/README.md)
 - [Validation Script](../scripts/validate/run-all.sh)
 - [CI/CD Architecture](../../docs/cicd/README.md)
 - [Terraform Standards](../../docs/terraform/standards.md)

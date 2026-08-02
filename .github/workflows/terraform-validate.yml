@@ -10,6 +10,7 @@ on:
     paths:
       - "**/*.tf"
       - "**/*.tfvars"
+      - "tests/**"
       - ".github/workflows/terraform-validate.yml"
       - ".github/actions/**"
   workflow_dispatch:
@@ -22,16 +23,31 @@ env:
   TF_VERSION: "1.13.0"
 
 jobs:
+  discover:
+    name: Discover Targets
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.discover.outputs.modules }}
+      environments: ${{ steps.discover.outputs.environments }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Discover modules and environments
+        id: discover
+        run: |
+          chmod +x tests/scripts/discover-modules.sh tests/scripts/discover-environments.sh
+          echo "modules=$(./tests/scripts/discover-modules.sh --json | jq -c .)" >> "$GITHUB_OUTPUT"
+          echo "environments=$(./tests/scripts/discover-environments.sh --json | jq -c .)" >> "$GITHUB_OUTPUT"
+
   validate:
     name: Validate (${{ matrix.environment }})
     runs-on: ubuntu-latest
+    needs: discover
     strategy:
       fail-fast: false
       matrix:
-        environment:
-          - dev
-          - stage
-          - prod
+        environment: ${{ fromJson(needs.discover.outputs.environments) }}
 
     steps:
       - name: Checkout
@@ -66,38 +82,13 @@ jobs:
           if-no-files-found: ignore
 
   validate-modules:
-    name: Validate Modules
+    name: Validate Modules (${{ matrix.module }})
     runs-on: ubuntu-latest
+    needs: discover
     strategy:
       fail-fast: false
       matrix:
-        module:
-          - common
-          - resource-group
-          - resource-lock
-          - naming
-          - networking
-          - private-dns
-          - managed-identity
-          - key-vault
-          - storage
-          - storage-containers
-          - acr
-          - container-app-environment
-          - container-app
-          - postgresql-flexible-server
-          - postgres
-          - redis
-          - log-analytics
-          - application-insights
-          - role-assignment
-          - key-vault-secrets
-          - diagnostic-settings
-          - action-group
-          - monitor-alerts
-          - monitor
-          - alerts
-          - budget
+        module: ${{ fromJson(needs.discover.outputs.modules) }}
 
     steps:
       - name: Checkout

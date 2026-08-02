@@ -17,9 +17,9 @@ resource "azurerm_private_dns_zone" "this" {
 resource "azurerm_private_dns_zone_virtual_network_link" "this" {
   for_each = local.virtual_network_links
 
-  name                  = each.value.name
-  private_dns_zone_id   = each.value.private_dns_zone_id
-  virtual_network_id    = each.value.virtual_network_id
-  registration_enabled  = each.value.registration_enabled
-  tags                  = each.value.tags
+  name                 = each.value.name
+  private_dns_zone_id  = each.value.private_dns_zone_id
+  virtual_network_id   = each.value.virtual_network_id
+  registration_enabled = each.value.registration_enabled
+  tags                 = each.value.tags
 }

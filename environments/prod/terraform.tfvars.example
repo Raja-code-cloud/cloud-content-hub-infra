@@ -9,5 +9,39 @@ owner         = "platform-engineering"
 business_unit = "engineering"
 cost_center   = "ENG-001"
 
-tags = {}
+tags            = {}
 additional_tags = {}
+
+# Production defaults: private networking enabled, public access disabled.
+enable_private_networking  = true
+enable_private_endpoints   = true
+public_network_access_enabled = false
+
+# Governance and observability (requires contact emails for budgets/alerts).
+enable_governance  = true
+enable_diagnostics = true
+enable_monitoring  = true
+
+budget_amount = 2000
+budget_contact_emails = [
+  "platform-alerts@example.com",
+]
+alert_contact_emails = [
+  "platform-alerts@example.com",
+]
+
+# Supply secrets via environment variables — never commit real values:
+#   export TF_VAR_postgresql_admin_password="<secure-password>"
+#   export TF_VAR_api_key_placeholder="<secure-api-key>"
+
+postgresql_administrator_login = "psqladmin"
+
+# Required: object ID of the GitHub Actions / Terraform deployment service principal.
+deployment_principal_id = "00000000-0000-0000-0000-000000000000"
+
+# Pin immutable image tags promoted from stage.
+container_image_name = "api"
+container_image_tag  = "1.0.0"
+
+container_target_port              = 8080
+container_ingress_external_enabled = false

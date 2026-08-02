@@ -49,6 +49,11 @@ output "resource_catalog" {
   }
 }
 
+output "allowed_region_codes" {
+  description = "Canonical list of supported Azure region codes for module variable validation."
+  value       = keys(local.allowed_regions)
+}
+
 output "allowed_regions" {
   description = "Map of supported Azure regions to short codes."
   value       = local.allowed_regions

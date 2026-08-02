@@ -1,0 +1,67 @@
+name: Azure Terraform
+description: Azure OIDC authentication and Terraform backend initialization
+
+inputs:
+  working-directory:
+    description: Terraform working directory
+    required: true
+  azure-client-id:
+    description: Azure AD application (service principal) client ID for OIDC
+    required: false
+    default: ""
+  azure-tenant-id:
+    description: Azure AD tenant ID
+    required: false
+    default: ""
+  azure-subscription-id:
+    description: Target Azure subscription ID
+    required: false
+    default: ""
+  tf-state-resource-group:
+    description: Remote state storage resource group name
+    required: false
+    default: ""
+  tf-state-storage-account:
+    description: Remote state storage account name
+    required: false
+    default: ""
+  tf-state-container:
+    description: Remote state blob container name
+    required: false
+    default: "tfstate"
+  tf-state-key:
+    description: Remote state blob key (e.g. prod.tfstate)
+    required: false
+    default: ""
+  use-remote-backend:
+    description: When true, initialize Terraform with azurerm remote backend
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Azure Login (OIDC)
+      if: inputs.azure-client-id != ''
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Terraform Init (remote backend)
+      if: inputs.use-remote-backend == 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        terraform init -input=false \
+          -backend-config="resource_group_name=${{ inputs.tf-state-resource-group }}" \
+          -backend-config="storage_account_name=${{ inputs.tf-state-storage-account }}" \
+          -backend-config="container_name=${{ inputs.tf-state-container }}" \
+          -backend-config="key=${{ inputs.tf-state-key }}"
+
+    - name: Terraform Init (local backend)
+      if: inputs.use-remote-backend != 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: terraform init -backend=false -input=false

@@ -146,6 +146,11 @@ module "storage" {
   location                      = module.common.location
   tags                          = module.common.tags
   public_network_access_enabled = local.networking_enabled ? false : var.public_network_access_enabled
+  network_rules = local.networking_enabled ? {
+    default_action             = "Deny"
+    bypass                     = ["AzureServices"]
+    virtual_network_subnet_ids = [module.networking[0].subnet_ids["private-endpoints"]]
+  } : null
 }
 
 module "storage_containers" {

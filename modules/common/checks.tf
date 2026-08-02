@@ -1,9 +1,8 @@
 # ------------------------------------------------------------------------------
-# Provider Configuration
+# Common Module — Check Blocks
 #
 # Modules in this repository do NOT declare providers or required_providers.
-# Providers are configured exclusively at the environment root level and
-# inherited automatically by all child modules.
+# Providers are configured exclusively at the environment root level.
 #
 # See: docs/terraform/provider-inheritance.md
 # ------------------------------------------------------------------------------

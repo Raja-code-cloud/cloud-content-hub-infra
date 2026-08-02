@@ -45,10 +45,23 @@ jobs:
     needs: format
     uses: ./.github/workflows/terraform-lint.yml
 
+  docs:
+    name: Documentation
+    needs: format
+    uses: ./.github/workflows/terraform-docs.yml
+
   security:
     name: Security
     needs: format
     uses: ./.github/workflows/terraform-security.yml
+
+  test-framework:
+    name: Test Framework
+    needs: format
+    uses: ./.github/workflows/terraform-test-framework.yml
+    with:
+      suite: regression
+      with_plan: true
 
   record:
     name: Record Validation
@@ -57,7 +70,9 @@ jobs:
       - format
       - validate
       - lint
+      - docs
       - security
+      - test-framework
     outputs:
       git_commit: ${{ steps.commit.outputs.git_commit }}
       validation_passed: ${{ steps.result.outputs.passed }}

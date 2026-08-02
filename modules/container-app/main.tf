@@ -351,6 +351,13 @@ resource "azurerm_container_app" "this" {
   }
 }
 
+check "secret_lifecycle_ignore_required" {
+  assert {
+    condition     = var.lifecycle_options.ignore_secret_values
+    error_message = "lifecycle_options.ignore_secret_values must be true when using Key Vault secret references."
+  }
+}
+
 check "ingress_required_for_external_http_scaling" {
   assert {
     condition     = length(var.scale.http_rules) == 0 || local.ingress_enabled

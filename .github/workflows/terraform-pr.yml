@@ -10,6 +10,10 @@ on:
       - "**/*.tfvars"
       - "modules/**"
       - "environments/**"
+      - "tests/**"
+      - "deployment/**"
+      - "release/**"
+      - "policies/**"
       - ".github/**"
       - ".tflint.hcl"
       - ".checkov.yml"
@@ -65,6 +69,17 @@ jobs:
       security-events: write
       actions: read
 
+  test-framework:
+    name: Test Framework
+    needs:
+      - format
+    uses: ./.github/workflows/terraform-test-framework.yml
+    with:
+      suite: regression
+      with_plan: false
+    permissions:
+      contents: read
+
   plan:
     name: Plan
     needs:
@@ -87,6 +102,7 @@ jobs:
       - validate
       - docs
       - security
+      - test-framework
       - plan
     if: always()
 
@@ -109,8 +125,9 @@ jobs:
             echo "| Lint | ${{ needs.lint.result }} |"
             echo "| Validate | ${{ needs.validate.result }} |"
             echo "| Docs | ${{ needs.docs.result }} |"
-            echo "| Security | ${{ needs.security.result }} |"
-            echo "| Plan | ${{ needs.plan.result }} |"
+          echo "| Security | ${{ needs.security.result }} |"
+          echo "| Test Framework | ${{ needs.test-framework.result }} |"
+          echo "| Plan | ${{ needs.plan.result }} |"
           } > pr-validation-summary.md
 
           for result in \
@@ -119,6 +136,7 @@ jobs:
             "${{ needs.validate.result }}" \
             "${{ needs.docs.result }}" \
             "${{ needs.security.result }}" \
+            "${{ needs.test-framework.result }}" \
             "${{ needs.plan.result }}"; do
             if [[ "$result" == "failure" ]] || [[ "$result" == "cancelled" ]]; then
               echo "::error::Pull request checks failed."

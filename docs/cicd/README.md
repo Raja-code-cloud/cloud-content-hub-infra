@@ -34,8 +34,8 @@ Enterprise GitHub Actions CI/CD foundation for **cloud-content-hub-infra**.
 | Documentation | `terraform-docs.yml` | Push, `workflow_dispatch`, `workflow_call` | Verify module README docs |
 | Security | `terraform-security.yml` | Push, `workflow_dispatch`, `workflow_call` | Checkov, tfsec, Trivy |
 | Plan | `terraform-plan.yml` | `workflow_dispatch`, `workflow_call` | Generate and upload plan artifacts |
-| Apply | `terraform-apply.yml` | Manual only | Apply with approval gate (disabled until OIDC) |
-| Destroy | `terraform-destroy.yml` | Manual only | Destroy non-prod (disabled until OIDC) |
+| Apply | `terraform-apply.yml` | Manual only | Apply with OIDC + remote backend |
+| Destroy | `terraform-destroy.yml` | Manual only | Destroy non-prod with OIDC |
 | Release | `release.yml` | Tag `v*.*.*` | Validate, scan, plan, publish release |
 
 ## Execution Order
@@ -144,9 +144,9 @@ Configure these environments in **Settings → Environments**:
 
 Environment names in workflows match directory names (`dev`, `stage`, `prod`).
 
-## OIDC Preparation
+## OIDC Authentication
 
-Workflows include OIDC-compatible permissions but **do not configure Azure authentication yet**.
+Workflows authenticate to Azure using **GitHub OIDC** via the composite action `.github/actions/azure-terraform`.
 
 ```yaml
 permissions:
@@ -154,34 +154,46 @@ permissions:
   contents: read
 ```
 
-### Future Secrets (Placeholders)
+### Required GitHub Environment Secrets
 
-Configure these when OIDC is implemented:
+Configure on each GitHub Environment (`dev`, `stage`, `prod`):
 
-| Secret / Variable | Purpose |
-|-------------------|---------|
-| `AZURE_CLIENT_ID` | App registration client ID for federated credentials |
+| Secret | Purpose |
+|--------|---------|
+| `AZURE_CLIENT_ID` | App registration client ID with federated credential for `repo:ORG/REPO:environment:ENV` |
 | `AZURE_TENANT_ID` | Azure AD tenant ID |
 | `AZURE_SUBSCRIPTION_ID` | Target subscription per environment |
 | `TF_STATE_RESOURCE_GROUP` | Backend storage resource group |
 | `TF_STATE_STORAGE_ACCOUNT` | Backend storage account name |
 | `TF_STATE_CONTAINER` | State container name (default: `tfstate`) |
+| `TF_STATE_KEY` | State blob key (default: `<environment>.tfstate`) |
 
-### Future OIDC Apply Step
+Bootstrap state storage:
 
-```yaml
-- name: Azure Login (OIDC)
-  uses: azure/login@v2
-  with:
-    client-id: ${{ secrets.AZURE_CLIENT_ID }}
-    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-- name: Terraform Apply
-  run: terraform apply -input=false -auto-approve tfplan
+```bash
+./deployment/scripts/bootstrap/provision-state-storage.sh <subscription-id> <location>
 ```
 
-Apply and destroy steps are currently disabled with placeholder notices.
+### Apply and Destroy
+
+Apply and destroy workflows **require** OIDC and backend secrets. They fail fast with a clear error when secrets are missing.
+
+Plan and drift workflows use remote backend when secrets are configured; otherwise they fall back to `-backend=false` for syntax validation on PRs.
+
+```yaml
+- name: Azure Terraform Init
+  uses: ./.github/actions/azure-terraform
+  with:
+    working-directory: environments/${{ matrix.environment }}
+    azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    tf-state-resource-group: ${{ secrets.TF_STATE_RESOURCE_GROUP }}
+    tf-state-storage-account: ${{ secrets.TF_STATE_STORAGE_ACCOUNT }}
+    tf-state-container: ${{ secrets.TF_STATE_CONTAINER }}
+    tf-state-key: ${{ steps.backend.outputs.state_key }}
+    use-remote-backend: ${{ steps.backend.outputs.use_remote }}
+```
 
 ## Required Tool Versions
 

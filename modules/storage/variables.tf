@@ -149,3 +149,23 @@ variable "tags" {
     error_message = "tags must contain at least one tag. Supply merged tags from the shared foundation."
   }
 }
+
+variable "network_rules" {
+  description = "Optional network rules restricting storage account access. Recommended when private endpoints are enabled."
+  type = object({
+    default_action             = optional(string, "Deny")
+    bypass                     = optional(list(string), ["AzureServices"])
+    ip_rules                   = optional(list(string), [])
+    virtual_network_subnet_ids = optional(list(string), [])
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition = (
+      var.network_rules == null ||
+      contains(["Allow", "Deny"], var.network_rules.default_action)
+    )
+    error_message = "network_rules.default_action must be Allow or Deny."
+  }
+}

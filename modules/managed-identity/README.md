@@ -32,7 +32,7 @@ This module creates **only** the managed identity resource.
 | Name | Version |
 |------|---------|
 | terraform | >= 1.13.0 |
-| azurerm | ~> 4.0 |
+| azurerm | ~> 5.0 |
 
 Providers are inherited from the environment root module.
 
@@ -49,7 +49,7 @@ Providers are inherited from the environment root module.
 
 | Name | Description |
 |------|-------------|
-| `id` | Client ID (alias for application authentication) |
+| `id` | Azure Resource Manager ID |
 | `client_id` | Client ID for application and service configuration |
 | `principal_id` | Object ID for Azure RBAC role assignments |
 | `resource_id` | Azure Resource Manager ID |

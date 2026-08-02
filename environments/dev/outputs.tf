@@ -27,6 +27,11 @@ output "container_app_url" {
   value       = module.container_app.ingress_url
 }
 
+output "container_app_id" {
+  description = "Azure Resource Manager ID of the Container App."
+  value       = module.container_app.id
+}
+
 output "container_app_fqdn" {
   description = "FQDN of the latest Container App revision."
   value       = module.container_app.fqdn

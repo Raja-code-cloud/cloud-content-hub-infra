@@ -1,0 +1,5 @@
+# Test Reports
+
+Generated test reports are written here by `tests/scripts/generate-report.sh`.
+
+This directory is gitignored except for this placeholder file.

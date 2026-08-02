@@ -54,6 +54,8 @@ temp/
 # Test and coverage artifacts
 coverage/
 *.test
+tests/reports/*
+!tests/reports/.gitkeep
 
 # Local tooling
 .tflint.d/

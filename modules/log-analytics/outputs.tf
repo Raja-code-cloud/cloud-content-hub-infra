@@ -3,8 +3,8 @@
 # ------------------------------------------------------------------------------
 
 output "id" {
-  description = "The Workspace ID (Customer ID / GUID) for the Log Analytics Workspace."
-  value       = azurerm_log_analytics_workspace.this.workspace_id
+  description = "The Azure Resource Manager ID of the Log Analytics Workspace."
+  value       = azurerm_log_analytics_workspace.this.id
 }
 
 output "name" {
@@ -47,7 +47,8 @@ output "sku" {
 output "workspace" {
   description = "Non-sensitive workspace metadata for downstream module composition."
   value = {
-    id                  = azurerm_log_analytics_workspace.this.workspace_id
+    id                  = azurerm_log_analytics_workspace.this.id
+    customer_id         = azurerm_log_analytics_workspace.this.workspace_id
     name                = azurerm_log_analytics_workspace.this.name
     resource_id         = azurerm_log_analytics_workspace.this.id
     location            = azurerm_log_analytics_workspace.this.location

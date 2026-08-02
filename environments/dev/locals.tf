@@ -59,4 +59,11 @@ locals {
   ] : []
 
   role_assignments = concat(local.workload_role_assignments, local.deployer_role_assignments)
+
+  postgresql_databases = [
+    {
+      name            = "cloud_content_hub"
+      prevent_destroy = false
+    },
+  ]
 }

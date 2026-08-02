@@ -3,8 +3,8 @@
 # ------------------------------------------------------------------------------
 
 output "id" {
-  description = "The Client ID of the User Assigned Managed Identity (used by applications for authentication)."
-  value       = azurerm_user_assigned_identity.this.client_id
+  description = "The Azure Resource Manager ID of the User Assigned Managed Identity."
+  value       = azurerm_user_assigned_identity.this.id
 }
 
 output "client_id" {

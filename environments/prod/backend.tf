@@ -12,9 +12,7 @@
 
 terraform {
   backend "azurerm" {
-    resource_group_name  = "<placeholder-resource-group>"
-    storage_account_name = "<placeholder-storage-account>"
-    container_name       = "tfstate"
-    key                  = "prod.tfstate"
+    # Values supplied at init time via -backend-config (see backend.hcl.example).
+    # Local validate/plan without remote state: terraform init -backend=false
   }
 }

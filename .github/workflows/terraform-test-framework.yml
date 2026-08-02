@@ -1,0 +1,408 @@
+name: Terraform Test Framework
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - "modules/**"
+      - "environments/**"
+      - "tests/**"
+      - ".github/**"
+      - ".tflint.hcl"
+      - ".checkov.yml"
+      - ".tfsec.yml"
+      - ".terraform-docs.yml"
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - "modules/**"
+      - "environments/**"
+      - "tests/**"
+      - ".github/**"
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Test suite to execute
+        required: true
+        type: choice
+        default: regression
+        options:
+          - all
+          - static
+          - modules
+          - environments
+          - security
+          - compliance
+          - plan
+          - regression
+      environment:
+        description: Environment for plan suite
+        required: false
+        type: choice
+        default: dev
+        options:
+          - dev
+          - stage
+          - prod
+      with_plan:
+        description: Include plan validation
+        required: false
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      suite:
+        description: Test suite to execute
+        required: false
+        type: string
+        default: regression
+      environment:
+        description: Environment for plan suite
+        required: false
+        type: string
+        default: dev
+      with_plan:
+        description: Include plan validation
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  TF_VERSION: "1.13.0"
+  TFLINT_VERSION: "v0.50.3"
+  TERRAFORM_DOCS_VERSION: "v0.19.0"
+
+jobs:
+  discover:
+    name: Discover Targets
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.discover.outputs.modules }}
+      environments: ${{ steps.discover.outputs.environments }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Discover modules and environments
+        id: discover
+        run: |
+          chmod +x tests/scripts/discover-modules.sh tests/scripts/discover-environments.sh
+          echo "modules=$(./tests/scripts/discover-modules.sh --json | jq -c .)" >> "$GITHUB_OUTPUT"
+          echo "environments=$(./tests/scripts/discover-environments.sh --json | jq -c .)" >> "$GITHUB_OUTPUT"
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    needs: discover
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+
+      - name: Setup TFLint
+        uses: ./.github/actions/setup-tflint
+        with:
+          tflint-version: ${{ env.TFLINT_VERSION }}
+
+      - name: Install terraform-docs
+        run: |
+          curl -sSLo terraform-docs.tar.gz \
+            "https://terraform-docs.io/dl/${TERRAFORM_DOCS_VERSION}/terraform-docs-${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz"
+          tar -xzf terraform-docs.tar.gz
+          chmod +x terraform-docs
+          sudo mv terraform-docs /usr/local/bin/terraform-docs
+
+      - name: Run static analysis
+        run: |
+          chmod +x tests/scripts/run-static-analysis.sh
+          ./tests/scripts/run-static-analysis.sh
+
+      - name: Upload static report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-analysis-report-${{ github.run_id }}
+          path: tests/reports/static-summary.md
+          retention-days: 14
+          if-no-files-found: ignore
+
+  validate-modules:
+    name: Module (${{ matrix.module }})
+    runs-on: ubuntu-latest
+    needs: discover
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.discover.outputs.modules) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: modules/${{ matrix.module }}
+
+      - name: Validate module
+        run: |
+          chmod +x tests/scripts/run-module-tests.sh
+          ./tests/scripts/run-module-tests.sh "${{ matrix.module }}"
+
+  validate-environments:
+    name: Environment (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    needs: discover
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.discover.outputs.environments) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: environments/${{ matrix.environment }}
+
+      - name: Validate environment
+        run: |
+          chmod +x tests/scripts/run-environment-tests.sh
+          ./tests/scripts/run-environment-tests.sh "${{ matrix.environment }}"
+
+  security:
+    name: Security Scans
+    runs-on: ubuntu-latest
+    needs: discover
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: terraform
+          config_file: .checkov.yml
+          soft_fail: false
+          output_format: sarif
+          output_file_path: tests/reports/checkov.sarif
+          hard_fail_on: HIGH,CRITICAL
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: .
+          soft_fail: false
+          format: sarif
+          sarif_file: tests/reports/tfsec.sarif
+          minimum_severity: HIGH
+
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          format: sarif
+          output: tests/reports/trivy.sarif
+          trivyignores: .trivyignore
+
+      - name: Run repository security tests
+        run: |
+          chmod +x tests/scripts/check-secrets.sh tests/scripts/check-sensitive-outputs.sh
+          ./tests/scripts/check-secrets.sh
+          ./tests/scripts/check-sensitive-outputs.sh
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports-${{ github.run_id }}
+          path: tests/reports/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  compliance:
+    name: Compliance
+    runs-on: ubuntu-latest
+    needs: discover
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run compliance tests
+        run: |
+          chmod +x tests/scripts/run-compliance-tests.sh
+          ./tests/scripts/run-compliance-tests.sh
+
+      - name: Upload compliance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report-${{ github.run_id }}
+          path: tests/reports/compliance-summary.md
+          retention-days: 14
+          if-no-files-found: ignore
+
+  integration:
+    name: Integration
+    runs-on: ubuntu-latest
+    needs:
+      - discover
+      - validate-modules
+      - validate-environments
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+
+      - name: Run integration tests
+        run: |
+          chmod +x tests/integration/environment-composition.test.sh tests/unit/module-validation.test.sh
+          ./tests/integration/environment-composition.test.sh
+          ./tests/unit/module-validation.test.sh
+
+  plan-validation:
+    name: Plan (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    needs:
+      - discover
+      - validate-environments
+      - security
+      - compliance
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'workflow_dispatch' && inputs.with_plan) ||
+      (github.event_name == 'workflow_call' && inputs.with_plan) ||
+      startsWith(github.ref, 'refs/heads/release/') ||
+      startsWith(github.ref, 'refs/heads/hotfix/')
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.discover.outputs.environments) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: environments/${{ matrix.environment }}
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Run plan validation
+        run: |
+          chmod +x tests/scripts/run-plan-validation.sh tests/scripts/analyze-plan.sh
+          ./tests/scripts/run-plan-validation.sh "${{ matrix.environment }}"
+
+      - name: Upload plan reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan-report-${{ matrix.environment }}-${{ github.run_id }}
+          path: |
+            tests/reports/plan-${{ matrix.environment }}.log
+            tests/reports/plan-analysis-${{ matrix.environment }}.md
+          retention-days: 30
+          if-no-files-found: ignore
+
+  report:
+    name: Test Report
+    runs-on: ubuntu-latest
+    needs:
+      - discover
+      - static-analysis
+      - validate-modules
+      - validate-environments
+      - security
+      - compliance
+      - integration
+      - plan-validation
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Generate framework report
+        run: |
+          mkdir -p tests/reports
+          chmod +x tests/scripts/generate-report.sh
+          ./tests/scripts/generate-report.sh || true
+
+      - name: Write workflow summary
+        run: |
+          {
+            echo "# Terraform Test Framework Summary"
+            echo ""
+            echo "| Job | Result |"
+            echo "|-----|--------|"
+            echo "| Static Analysis | ${{ needs.static-analysis.result }} |"
+            echo "| Validate Modules | ${{ needs.validate-modules.result }} |"
+            echo "| Validate Environments | ${{ needs.validate-environments.result }} |"
+            echo "| Security | ${{ needs.security.result }} |"
+            echo "| Compliance | ${{ needs.compliance.result }} |"
+            echo "| Integration | ${{ needs.integration.result }} |"
+            echo "| Plan Validation | ${{ needs.plan-validation.result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload framework reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-test-framework-report-${{ github.run_id }}
+          path: tests/reports/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Evaluate overall result
+        run: |
+          for result in \
+            "${{ needs.static-analysis.result }}" \
+            "${{ needs.validate-modules.result }}" \
+            "${{ needs.validate-environments.result }}" \
+            "${{ needs.security.result }}" \
+            "${{ needs.compliance.result }}" \
+            "${{ needs.integration.result }}"; do
+            if [[ "$result" == "failure" || "$result" == "cancelled" ]]; then
+              echo "::error::One or more required test jobs failed."
+              exit 1
+            fi
+          done
+
+          plan_result="${{ needs.plan-validation.result }}"
+          if [[ "$plan_result" == "failure" ]]; then
+            echo "::error::Plan validation failed."
+            exit 1
+          fi
+
+          echo "Terraform test framework passed."
