@@ -9,7 +9,7 @@
 resource "azurerm_monitor_action_group" "this" {
   for_each = local.action_groups
 
-  name                = each.value.name
+  name                = each.value.action_group_name
   resource_group_name = each.value.resource_group_name
   short_name          = each.value.short_name
   enabled             = try(each.value.enabled, true)
@@ -102,7 +102,7 @@ resource "azurerm_monitor_action_group" "this" {
   }
 
   dynamic "event_hub_receiver" {
-    for_each = try(each.value.event_hub_receivers, [])
+    for_each = try(each.value.eventhub_receivers, [])
     content {
       name                    = event_hub_receiver.value.name
       event_hub_namespace     = event_hub_receiver.value.event_hub_namespace
@@ -113,7 +113,7 @@ resource "azurerm_monitor_action_group" "this" {
   }
 
   dynamic "logic_app_receiver" {
-    for_each = try(each.value.logic_app_receiver, null) != null ? [each.value.logic_app_receiver] : []
+    for_each = try(each.value.logic_app_receivers, [])
     content {
       name                    = logic_app_receiver.value.name
       resource_id             = logic_app_receiver.value.resource_id
@@ -123,7 +123,7 @@ resource "azurerm_monitor_action_group" "this" {
   }
 
   dynamic "itsm_receiver" {
-    for_each = try(each.value.itsm_receiver, null) != null ? [each.value.itsm_receiver] : []
+    for_each = try(each.value.itsm_receivers, [])
     content {
       name                 = itsm_receiver.value.name
       workspace_id         = itsm_receiver.value.workspace_id

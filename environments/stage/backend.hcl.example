@@ -1,0 +1,7 @@
+# Copy to backend.hcl and populate after bootstrap storage is provisioned.
+# Usage: terraform init -backend-config=backend.hcl
+
+resource_group_name  = "<placeholder-resource-group>"
+storage_account_name = "<placeholder-storage-account>"
+container_name       = "tfstate"
+key                  = "stage.tfstate"

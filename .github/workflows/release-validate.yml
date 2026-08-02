@@ -1,0 +1,91 @@
+name: Release Validate
+
+on:
+  workflow_call:
+    inputs:
+      git_ref:
+        description: Git ref to validate
+        required: true
+        type: string
+      environment:
+        description: Target environment for plan gate
+        required: false
+        type: string
+        default: prod
+    outputs:
+      git_commit:
+        description: Resolved git commit SHA
+        value: ${{ jobs.record.outputs.git_commit }}
+      validation_passed:
+        description: Whether validation passed
+        value: ${{ jobs.record.outputs.validation_passed }}
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  security-events: write
+  actions: read
+
+env:
+  TF_VERSION: "1.13.0"
+
+jobs:
+  format:
+    name: Format
+    uses: ./.github/workflows/terraform-format.yml
+
+  validate:
+    name: Validate
+    needs: format
+    uses: ./.github/workflows/terraform-validate.yml
+
+  lint:
+    name: Lint
+    needs: format
+    uses: ./.github/workflows/terraform-lint.yml
+
+  security:
+    name: Security
+    needs: format
+    uses: ./.github/workflows/terraform-security.yml
+
+  record:
+    name: Record Validation
+    runs-on: ubuntu-latest
+    needs:
+      - format
+      - validate
+      - lint
+      - security
+    outputs:
+      git_commit: ${{ steps.commit.outputs.git_commit }}
+      validation_passed: ${{ steps.result.outputs.passed }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref }}
+
+      - name: Record git commit
+        id: commit
+        run: echo "git_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set validation result
+        id: result
+        run: echo "passed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Write validation summary
+        run: |
+          {
+            echo "# Release Validation — \`${{ inputs.git_ref }}\`"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Git ref | \`${{ inputs.git_ref }}\` |"
+            echo "| Commit | \`${{ steps.commit.outputs.git_commit }}\` |"
+            echo "| Environment | \`${{ inputs.environment }}\` |"
+            echo "| Terraform | \`${{ env.TF_VERSION }}\` |"
+            echo "| Result | passed |"
+          } >> "$GITHUB_STEP_SUMMARY"

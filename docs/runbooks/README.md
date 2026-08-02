@@ -13,9 +13,22 @@ Operational runbooks for Cloud Content Hub infrastructure.
 | [Terraform State Recovery](terraform-state-recovery.md) | State corruption, locks, and restore | S1–S2 |
 | [Provider Upgrade](provider-upgrade.md) | Safe provider version upgrades | Standard |
 
-## Deployment Framework
+## Deployment and Release Frameworks
 
-All runbooks reference the enterprise deployment framework:
+| Framework | Purpose |
+|-----------|---------|
+| [deployment/](../../deployment/README.md) | Bootstrap, plan/apply scripts, state management |
+| [release/](../../release/README.md) | Promotion pipeline (Dev → Stage → Prod), audit, drift |
+
+### Release runbooks
+
+| Runbook | Description |
+|---------|-------------|
+| [Normal Promotion](../../release/runbooks/normal-promotion.md) | Standard Dev → Stage → Prod promotion |
+| [Emergency Promotion](../../release/runbooks/emergency-promotion.md) | Expedited production change |
+| [Release Rollback](../../release/runbooks/rollback.md) | Tag-based rollback |
+| [Failed Deployment](../../release/runbooks/failed-deployment.md) | Recover from failed apply |
+| [Drift Recovery](../../release/runbooks/drift-recovery.md) | Remediate infrastructure drift |
 
 ```
 deployment/
@@ -26,11 +39,16 @@ deployment/
 ├── validate/     — Quality gates
 ├── state/        — State management
 ├── versioning/   — Version policy
-├── release/      — Promotion strategy
+├── release/      — Promotion strategy (legacy — see release/)
 └── scripts/      — Orchestration scripts
-```
 
-Start here: [deployment/README.md](../../deployment/README.md)
+release/
+├── docs/         — Lifecycle, artifacts, audit
+├── runbooks/     — Promotion and rollback procedures
+├── scripts/      — promote.sh, rollback-release.sh, detect-drift.sh
+├── checklists/   — Pre-promotion checklists
+└── templates/    — Audit and change request templates
+```
 
 ## Quick Reference
 

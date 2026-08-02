@@ -54,8 +54,14 @@ Authentication is **not** configured in provider blocks. CI/CD will use GitHub A
 │   ├── validate/         # Quality and security gates
 │   ├── state/            # State locking, recovery, drift
 │   ├── versioning/       # Version policy
-│   ├── release/          # Promotion and tagging
+│   ├── release/          # Promotion and tagging (see also release/)
 │   └── scripts/          # Orchestration scripts
+├── release/              # Release and promotion framework (Dev → Stage → Prod)
+│   ├── docs/             # Lifecycle, artifacts, audit, change management
+│   ├── runbooks/         # Promotion, rollback, drift recovery
+│   ├── scripts/          # promote, rollback, drift, quality gates
+│   ├── checklists/       # Pre-promotion checklists
+│   └── templates/        # Audit records, release notes, change requests
 ├── modules/              # Reusable Terraform modules
 ├── scripts/              # Operational scripts
 ├── examples/             # Reference implementations
@@ -144,8 +150,11 @@ Full reference: [Terraform Standards](docs/terraform/standards.md)
 | `application-insights` | Application Insights |
 | `role-assignment` | Azure RBAC role assignments |
 | `key-vault-secrets` | Key Vault secret management |
-| `monitor` | Azure Monitor configuration |
-| `alerts` | Alert rules and action groups |
+| `diagnostic-settings` | Azure Monitor diagnostic settings |
+| `action-group` | Azure Monitor action groups |
+| `monitor-alerts` | Azure Monitor metric alert rules |
+| `monitor` | _(placeholder — use `diagnostic-settings`, `action-group`, `monitor-alerts`)_ |
+| `alerts` | _(placeholder — superseded by `action-group` and `monitor-alerts`)_ |
 | `budget` | Cost management and budgets |
 
 ## Getting Started

@@ -1,3 +1,11 @@
+# Copy to terraform.tfvars — never commit terraform.tfvars to version control.
+#
+# Secrets: supply real values locally or via GitHub Actions:
+#   TF_VAR_postgresql_admin_password
+#   TF_VAR_api_key_placeholder
+#
+# See: docs/terraform/shared-foundation.md
+
 environment     = "stage"
 subscription_id = "00000000-0000-0000-0000-000000000000"
 
@@ -9,5 +17,44 @@ owner         = "platform-engineering"
 business_unit = "engineering"
 cost_center   = "ENG-001"
 
-tags = {}
-additional_tags = {}
+tags = {
+  promotion_tier = "pre-production"
+}
+additional_tags = {
+  criticality = "medium"
+}
+
+# --- Feature flags -------------------------------------------------------------
+
+enable_private_networking       = false
+enable_private_endpoints        = false
+public_network_access_enabled   = true
+enable_governance               = true
+enable_diagnostics              = true
+enable_monitoring               = true
+
+# --- Governance ----------------------------------------------------------------
+
+budget_amount = 500
+budget_contact_emails = [
+  "platform-alerts@example.com",
+]
+alert_contact_emails = [
+  "platform-alerts@example.com",
+]
+
+# --- Secrets (replace with secure values — placeholders only) ------------------
+
+postgresql_administrator_login = "psqladmin"
+postgresql_admin_password      = "ChangeMe-Stage-Pass-123!"
+api_key_placeholder            = "replace-via-github-actions-secret"
+
+# Optional: GitHub Actions OIDC service principal object ID for Key Vault secret provisioning
+# deployment_principal_id = "00000000-0000-0000-0000-000000000000"
+
+# --- Container App -------------------------------------------------------------
+
+container_image_name               = "api"
+container_image_tag                = "stage"
+container_target_port              = 8080
+container_ingress_external_enabled = true

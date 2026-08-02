@@ -74,11 +74,14 @@ jobs:
         module:
           - common
           - resource-group
+          - resource-lock
           - naming
           - networking
+          - private-dns
           - managed-identity
           - key-vault
           - storage
+          - storage-containers
           - acr
           - container-app-environment
           - container-app
@@ -89,6 +92,9 @@ jobs:
           - application-insights
           - role-assignment
           - key-vault-secrets
+          - diagnostic-settings
+          - action-group
+          - monitor-alerts
           - monitor
           - alerts
           - budget

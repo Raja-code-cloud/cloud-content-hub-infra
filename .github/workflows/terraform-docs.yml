@@ -45,6 +45,9 @@ jobs:
           - application-insights
           - role-assignment
           - key-vault-secrets
+          - diagnostic-settings
+          - action-group
+          - monitor-alerts
           - monitor
           - alerts
           - budget

@@ -1,0 +1,190 @@
+name: Release Emergency
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Hotfix release tag (e.g. v1.2.4-hotfix.1)
+        required: true
+        type: string
+      git_ref:
+        description: Git ref (must match release tag)
+        required: true
+        type: string
+      emergency_ticket:
+        description: Emergency change ticket ID (e.g. INC-1234)
+        required: true
+        type: string
+      confirmation:
+        description: Type emergency-prod to confirm
+        required: true
+        type: string
+      reason:
+        description: Emergency reason and scope
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+  security-events: write
+  actions: read
+
+env:
+  TF_VERSION: "1.13.0"
+
+jobs:
+  guard:
+    name: Emergency Guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate emergency inputs
+        run: |
+          if [[ "${{ inputs.confirmation }}" != "emergency-prod" ]]; then
+            echo "::error::Type 'emergency-prod' to confirm emergency production change."
+            exit 1
+          fi
+          if [[ -z "${{ inputs.emergency_ticket }}" ]]; then
+            echo "::error::Emergency ticket ID is required."
+            exit 1
+          fi
+          if [[ "${{ inputs.git_ref }}" != "${{ inputs.release_tag }}" ]]; then
+            echo "::error::git_ref must match release_tag for emergency deployment."
+            exit 1
+          fi
+          if [[ ! "${{ inputs.release_tag }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-hotfix\.[0-9]+)?$ ]]; then
+            echo "::error::Emergency release tag must be v*.*.* or v*.*.*-hotfix.*"
+            exit 1
+          fi
+          echo "::warning::Emergency production change — ticket: ${{ inputs.emergency_ticket }}"
+
+  quality-gates:
+    name: Quality Gates (non-bypassable)
+    needs: guard
+    uses: ./.github/workflows/release-validate.yml
+    with:
+      git_ref: ${{ inputs.git_ref }}
+      environment: prod
+
+  plan:
+    name: Emergency Plan (prod)
+    runs-on: ubuntu-latest
+    needs:
+      - guard
+      - quality-gates
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref }}
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: environments/prod
+
+      - name: Terraform Init
+        working-directory: environments/prod
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Plan
+        working-directory: environments/prod
+        run: |
+          terraform plan \
+            -input=false \
+            -no-color \
+            -var-file=terraform.tfvars.example \
+            -out=tfplan 2>&1 | tee plan.log
+          terraform show -no-color tfplan > plan.txt
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: emergency-plan-prod-${{ github.run_id }}
+          path: |
+            environments/prod/tfplan
+            environments/prod/plan.txt
+            environments/prod/plan.log
+          retention-days: 90
+
+  apply:
+    name: Emergency Apply (prod)
+    runs-on: ubuntu-latest
+    needs:
+      - guard
+      - plan
+    environment: prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref }}
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: environments/prod
+
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: emergency-plan-prod-${{ github.run_id }}
+          path: environments/prod
+
+      - name: Terraform Init
+        working-directory: environments/prod
+        run: terraform init -backend=false -input=false
+
+      - name: Verify plan artifact
+        working-directory: environments/prod
+        run: |
+          [[ -f tfplan ]] || { echo "::error::Emergency plan artifact missing."; exit 1; }
+
+      - name: Terraform Apply (disabled — OIDC pending)
+        working-directory: environments/prod
+        run: |
+          echo "::warning::Emergency apply — ticket: ${{ inputs.emergency_ticket }}"
+          echo "Reason: ${{ inputs.reason }}"
+          echo "Apply disabled until Azure OIDC is configured."
+
+  audit:
+    name: Emergency Audit Record
+    runs-on: ubuntu-latest
+    needs:
+      - guard
+      - plan
+      - apply
+    if: always() && needs.plan.result == 'success'
+
+    steps:
+      - name: Generate emergency audit record
+        run: |
+          mkdir -p audit-records
+          cat > "audit-records/emergency-prod-${{ github.run_id }}.json" <<EOF
+          {
+            "record_type": "emergency_promotion",
+            "promotion_id": "${{ github.run_id }}",
+            "promotion_target": "prod",
+            "change_type": "emergency",
+            "git_ref": "${{ inputs.git_ref }}",
+            "release_tag": "${{ inputs.release_tag }}",
+            "emergency_ticket": "${{ inputs.emergency_ticket }}",
+            "reason": "${{ inputs.reason }}",
+            "terraform_version": "${{ env.TF_VERSION }}",
+            "plan_artifact": "emergency-plan-prod-${{ github.run_id }}",
+            "promoted_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            "apply_result": "${{ needs.apply.result }}"
+          }
+          EOF
+
+      - name: Upload audit record
+        uses: actions/upload-artifact@v4
+        with:
+          name: emergency-record-prod-${{ github.run_id }}
+          path: audit-records/
+          retention-days: 90

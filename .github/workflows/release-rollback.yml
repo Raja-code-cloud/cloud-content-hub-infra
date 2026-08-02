@@ -1,0 +1,174 @@
+name: Release Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+      release_tag:
+        description: Release tag to rollback to (e.g. v1.2.2)
+        required: true
+        type: string
+      confirmation:
+        description: Type rollback-<environment> to confirm (e.g. rollback-prod)
+        required: true
+        type: string
+      reason:
+        description: Reason for rollback
+        required: true
+        type: string
+      incident_ticket:
+        description: Incident ticket ID (optional)
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_VERSION: "1.13.0"
+
+jobs:
+  guard:
+    name: Confirm Rollback
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate confirmation
+        run: |
+          expected="rollback-${{ inputs.environment }}"
+          if [[ "${{ inputs.confirmation }}" != "$expected" ]]; then
+            echo "::error::Confirmation mismatch. Type '$expected' to confirm."
+            exit 1
+          fi
+          if [[ ! "${{ inputs.release_tag }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "::error::Invalid release tag format."
+            exit 1
+          fi
+
+  validate:
+    name: Pre-Rollback Validation
+    needs: guard
+    uses: ./.github/workflows/terraform-validate.yml
+
+  plan:
+    name: Rollback Plan (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    needs:
+      - guard
+      - validate
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag }}
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: environments/${{ inputs.environment }}
+
+      - name: Terraform Init
+        working-directory: environments/${{ inputs.environment }}
+        run: terraform init -backend=false -input=false
+
+      - name: Rollback Plan
+        working-directory: environments/${{ inputs.environment }}
+        run: |
+          terraform plan \
+            -input=false \
+            -no-color \
+            -var-file=terraform.tfvars.example \
+            -out=tfplan 2>&1 | tee plan.log
+          terraform show -no-color tfplan > plan.txt
+
+      - name: Upload rollback plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-plan-${{ inputs.environment }}-${{ github.run_id }}
+          path: |
+            environments/${{ inputs.environment }}/tfplan
+            environments/${{ inputs.environment }}/plan.txt
+            environments/${{ inputs.environment }}/plan.log
+          retention-days: 90
+
+  apply:
+    name: Rollback Apply (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    needs:
+      - guard
+      - plan
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag }}
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: environments/${{ inputs.environment }}
+
+      - name: Download rollback plan
+        uses: actions/download-artifact@v4
+        with:
+          name: rollback-plan-${{ inputs.environment }}-${{ github.run_id }}
+          path: environments/${{ inputs.environment }}
+
+      - name: Terraform Init
+        working-directory: environments/${{ inputs.environment }}
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Apply (disabled — OIDC pending)
+        working-directory: environments/${{ inputs.environment }}
+        run: |
+          echo "::notice::Rollback apply disabled until Azure OIDC is configured."
+          echo "Rollback to: ${{ inputs.release_tag }}"
+          echo "Reason: ${{ inputs.reason }}"
+
+  audit:
+    name: Rollback Audit Record
+    runs-on: ubuntu-latest
+    needs:
+      - guard
+      - plan
+      - apply
+    if: always() && needs.plan.result == 'success'
+
+    steps:
+      - name: Generate rollback audit record
+        run: |
+          mkdir -p audit-records
+          cat > "audit-records/rollback-${{ inputs.environment }}-${{ github.run_id }}.json" <<EOF
+          {
+            "record_type": "rollback",
+            "rollback_id": "${{ github.run_id }}",
+            "environment": "${{ inputs.environment }}",
+            "to_release_tag": "${{ inputs.release_tag }}",
+            "reason": "${{ inputs.reason }}",
+            "incident_ticket": "${{ inputs.incident_ticket }}",
+            "terraform_version": "${{ env.TF_VERSION }}",
+            "rolled_back_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            "apply_result": "${{ needs.apply.result }}"
+          }
+          EOF
+
+      - name: Upload audit record
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-record-${{ inputs.environment }}-${{ github.run_id }}
+          path: audit-records/
+          retention-days: 90

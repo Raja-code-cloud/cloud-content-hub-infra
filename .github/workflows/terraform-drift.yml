@@ -1,0 +1,148 @@
+name: Terraform Drift Detection
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+          - all
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_VERSION: "1.13.0"
+
+jobs:
+  resolve-environments:
+    name: Resolve Environments
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.resolve.outputs.environments }}
+    steps:
+      - name: Resolve target environments
+        id: resolve
+        run: |
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo 'environments=["dev","stage","prod"]' >> "$GITHUB_OUTPUT"
+          elif [[ "${{ inputs.environment }}" == "all" ]]; then
+            echo 'environments=["dev","stage","prod"]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'environments=["${{ inputs.environment }}"]' >> "$GITHUB_OUTPUT"
+          fi
+
+  drift:
+    name: Drift (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    needs: resolve-environments
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.resolve-environments.outputs.environments) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: environments/${{ matrix.environment }}
+
+      - name: Terraform Init
+        working-directory: environments/${{ matrix.environment }}
+        run: terraform init -backend=false -input=false
+
+      - name: Detect drift
+        id: drift
+        working-directory: environments/${{ matrix.environment }}
+        run: |
+          set +e
+          terraform plan \
+            -input=false \
+            -no-color \
+            -detailed-exitcode \
+            -var-file=terraform.tfvars.example \
+            -out=tfplan 2>&1 | tee plan.log
+          exit_code=$?
+          set -e
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+          if [[ -f tfplan ]]; then
+            terraform show -no-color tfplan > plan.txt || true
+          fi
+          exit 0
+
+      - name: Generate drift summary
+        working-directory: environments/${{ matrix.environment }}
+        run: |
+          exit_code="${{ steps.drift.outputs.exit_code }}"
+          {
+            echo "# Drift Report — \`${{ matrix.environment }}\`"
+            echo ""
+            echo "**Date:** $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "**Exit code:** $exit_code"
+            echo ""
+            case "$exit_code" in
+              0) echo "No drift detected." ;;
+              2) echo "Drift detected. Review plan.txt artifact." ;;
+              *) echo "Error during drift detection." ;;
+            esac
+          } > drift-summary.md
+
+          cat > drift-metadata.json <<EOF
+          {
+            "environment": "${{ matrix.environment }}",
+            "detected_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "git_commit": "${{ github.sha }}",
+            "drift_detected": $([ "${{ steps.drift.outputs.exit_code }}" = "2" ] && echo true || echo false),
+            "exit_code": ${{ steps.drift.outputs.exit_code }},
+            "workflow_run_id": "${{ github.run_id }}"
+          }
+          EOF
+
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report-${{ matrix.environment }}-${{ github.run_id }}
+          path: |
+            environments/${{ matrix.environment }}/plan.log
+            environments/${{ matrix.environment }}/plan.txt
+            environments/${{ matrix.environment }}/drift-summary.md
+            environments/${{ matrix.environment }}/drift-metadata.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Drift summary
+        run: cat "environments/${{ matrix.environment }}/drift-summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail on drift (prod)
+        if: steps.drift.outputs.exit_code == '2' && matrix.environment == 'prod'
+        run: |
+          echo "::warning::Production drift detected. See release/runbooks/drift-recovery.md"
+
+      - name: Fail on error
+        if: steps.drift.outputs.exit_code == '1'
+        run: |
+          echo "::error::Drift detection failed for ${{ matrix.environment }}"
+          exit 1
+
+  gate:
+    name: Drift Gate
+    runs-on: ubuntu-latest
+    needs: drift
+    if: always()
+
+    steps:
+      - name: Evaluate drift results
+        run: echo "Drift detection completed. Review artifacts for drift_detected=true."

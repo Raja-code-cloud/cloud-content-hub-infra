@@ -107,6 +107,10 @@ Local scripts mirror existing workflows:
 | `deploy/apply.sh` | `terraform-apply.yml` |
 | `destroy/destroy.sh` | `terraform-destroy.yml` |
 | Tag push | `release.yml` |
+| Promote environment | `release-promotion.yml` |
+| Emergency prod | `release-emergency.yml` |
+| Rollback | `release-rollback.yml` |
+| Drift detection | `terraform-drift.yml` |
 
 Workflow definitions: [docs/cicd/README.md](../docs/cicd/README.md).
 
@@ -145,6 +149,7 @@ Operational procedures for on-call and platform engineers:
 
 ## Related Documentation
 
+- [Release and Promotion Framework](../release/README.md)
 - [Terraform Standards](../docs/terraform/standards.md)
 - [Backend Strategy](../docs/terraform/backend-strategy.md)
 - [Provider Inheritance](../docs/terraform/provider-inheritance.md)
