@@ -56,7 +56,7 @@ locals {
     app_insights_sampling          = 25
     acr_sku                        = "Standard"
     key_vault_purge_protection     = true
-    postgres_sku                   = "GP_Standard_D2s_v3"
+    postgres_sku                   = "B_Standard_B2ms"
     postgres_storage_mb            = 65536
     postgres_backup_retention_days = 14
     postgres_geo_redundant_backup  = false
