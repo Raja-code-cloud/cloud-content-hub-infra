@@ -1,0 +1,37 @@
+# Environment Root Module Template
+#
+# Copy these files when creating a new environment root module.
+# Replace <env> with the environment name (e.g., dev, stage, prod).
+#
+# See: docs/terraform/README.md
+
+# --- versions.tf ---
+# terraform {
+#   required_version = ">= 1.13.0"
+#   required_providers { ... }
+# }
+
+# --- backend.tf ---
+# terraform {
+#   backend "azurerm" {
+#     key = "<env>.tfstate"
+#   }
+# }
+
+# --- providers.tf ---
+# provider "azurerm" { features { ... } }
+# provider "azapi" {}
+# provider "random" {}
+# provider "time" {}
+
+# --- variables.tf ---
+# variable "environment" { validation { condition = var.environment == "<env>" } }
+
+# --- locals.tf ---
+# locals { default_tags = merge(...) }
+
+# --- main.tf ---
+# module "..." { source = "../../modules/..." }
+
+# --- outputs.tf ---
+# output "environment" { ... }

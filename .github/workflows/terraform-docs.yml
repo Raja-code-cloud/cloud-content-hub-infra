@@ -1,0 +1,82 @@
+name: Terraform Documentation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+    paths:
+      - "modules/**"
+      - ".terraform-docs.yml"
+      - ".github/workflows/terraform-docs.yml"
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  TERRAFORM_DOCS_VERSION: "v0.19.0"
+
+jobs:
+  docs:
+    name: Documentation (${{ matrix.module }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - common
+          - resource-group
+          - naming
+          - networking
+          - managed-identity
+          - key-vault
+          - storage
+          - acr
+          - container-app-environment
+          - container-app
+          - postgresql-flexible-server
+          - postgres
+          - redis
+          - log-analytics
+          - application-insights
+          - role-assignment
+          - key-vault-secrets
+          - monitor
+          - alerts
+          - budget
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install terraform-docs
+        run: |
+          curl -sSLo terraform-docs.tar.gz \
+            "https://terraform-docs.io/dl/${TERRAFORM_DOCS_VERSION}/terraform-docs-${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz"
+          tar -xzf terraform-docs.tar.gz
+          chmod +x terraform-docs
+          sudo mv terraform-docs /usr/local/bin/terraform-docs
+          terraform-docs --version
+
+      - name: Generate module documentation
+        run: terraform-docs markdown table --config .terraform-docs.yml "modules/${{ matrix.module }}"
+
+      - name: Verify documentation is up to date
+        run: |
+          if ! git diff --exit-code "modules/${{ matrix.module }}/README.md"; then
+            echo "::error::Module documentation is outdated for modules/${{ matrix.module }}."
+            echo "Run: terraform-docs markdown table --config .terraform-docs.yml modules/${{ matrix.module }}"
+            exit 1
+          fi
+
+      - name: Upload documentation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-docs-${{ matrix.module }}
+          path: modules/${{ matrix.module }}/README.md
+          retention-days: 14

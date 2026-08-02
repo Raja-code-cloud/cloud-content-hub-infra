@@ -1,0 +1,6 @@
+# Trivy ignore file for cloud-content-hub-infra
+# Document each ignore with justification and ADR reference.
+#
+# Example:
+# AVD-AZU-0001
+# AVD-AZU-0002

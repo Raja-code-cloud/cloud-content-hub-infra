@@ -1,0 +1,111 @@
+name: Terraform Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+      confirmation:
+        description: 'Type the environment name to confirm apply (e.g. dev)'
+        required: true
+        type: string
+      use_plan_artifact:
+        description: Use plan artifact from a previous workflow run (run ID)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_VERSION: "1.13.0"
+
+jobs:
+  guard:
+    name: Confirm Apply
+    runs-on: ubuntu-latest
+    outputs:
+      confirmed: ${{ steps.validate.outputs.confirmed }}
+    steps:
+      - name: Validate confirmation input
+        id: validate
+        run: |
+          if [[ "${{ inputs.confirmation }}" != "${{ inputs.environment }}" ]]; then
+            echo "::error::Confirmation mismatch. Type '${{ inputs.environment }}' to confirm."
+            exit 1
+          fi
+          echo "confirmed=true" >> "$GITHUB_OUTPUT"
+
+  validate:
+    name: Pre-Apply Validation
+    needs: guard
+    uses: ./.github/workflows/terraform-validate.yml
+    secrets: inherit
+    permissions:
+      contents: read
+
+  apply:
+    name: Apply (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    needs:
+      - guard
+      - validate
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: environments/${{ inputs.environment }}
+
+      - name: Download plan artifact
+        if: inputs.use_plan_artifact != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ inputs.environment }}-${{ inputs.use_plan_artifact }}
+          path: environments/${{ inputs.environment }}
+
+      - name: Terraform Init
+        working-directory: environments/${{ inputs.environment }}
+        run: terraform init -backend=false -input=false
+
+      - name: Generate plan when artifact not provided
+        if: inputs.use_plan_artifact == ''
+        working-directory: environments/${{ inputs.environment }}
+        run: |
+          terraform plan \
+            -input=false \
+            -no-color \
+            -var-file=terraform.tfvars.example \
+            -out=tfplan
+
+      - name: Terraform Apply (disabled — OIDC pending)
+        working-directory: environments/${{ inputs.environment }}
+        run: |
+          echo "::notice::Apply execution is disabled until Azure OIDC authentication is configured."
+          echo "Environment: ${{ inputs.environment }}"
+          echo "After OIDC setup, enable the apply step below."
+          echo ""
+          echo "Planned command: terraform apply -input=false -auto-approve tfplan"
+          # Uncomment after OIDC and backend configuration:
+          # terraform apply -input=false -auto-approve tfplan
+
+      - name: Upload apply log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apply-log-${{ inputs.environment }}-${{ github.run_id }}
+          path: environments/${{ inputs.environment }}/
+          retention-days: 30
+          if-no-files-found: ignore

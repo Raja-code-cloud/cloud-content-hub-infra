@@ -1,0 +1,53 @@
+name: Terraform Lint
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - ".tflint.hcl"
+      - ".github/workflows/terraform-lint.yml"
+      - ".github/actions/**"
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  TFLINT_VERSION: "v0.50.3"
+
+jobs:
+  lint:
+    name: TFLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup TFLint
+        uses: ./.github/actions/setup-tflint
+        with:
+          tflint-version: ${{ env.TFLINT_VERSION }}
+
+      - name: Run TFLint
+        run: tflint --recursive --format compact
+
+      - name: Upload lint log
+        if: always()
+        run: tflint --recursive --format json > tflint-report.json || true
+
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tflint-report
+          path: tflint-report.json
+          retention-days: 14
+          if-no-files-found: ignore

@@ -1,0 +1,13 @@
+environment     = "stage"
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+project_name     = "cch"
+application_name = "cloud-content-hub"
+location         = "eastus"
+
+owner         = "platform-engineering"
+business_unit = "engineering"
+cost_center   = "ENG-001"
+
+tags = {}
+additional_tags = {}

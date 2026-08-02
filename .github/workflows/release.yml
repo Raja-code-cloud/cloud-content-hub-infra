@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+  id-token: write
+  security-events: read
+  actions: read
+
+env:
+  TF_VERSION: "1.13.0"
+
+jobs:
+  validate:
+    name: Validate Repository
+    uses: ./.github/workflows/terraform-validate.yml
+    permissions:
+      contents: read
+
+  security:
+    name: Security Scan
+    uses: ./.github/workflows/terraform-security.yml
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+  plan:
+    name: Plan All Environments
+    needs:
+      - validate
+      - security
+    uses: ./.github/workflows/terraform-plan.yml
+    permissions:
+      contents: read
+      id-token: write
+
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs:
+      - validate
+      - security
+      - plan
+    if: success()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          prev_tag=$(git describe --tags --abbrev=0 "${tag}^" 2>/dev/null || echo "")
+          {
+            echo "## Cloud Content Hub Infrastructure ${tag}"
+            echo ""
+            echo "### Validation"
+            echo "- Terraform validate: passed"
+            echo "- Security scans: passed"
+            echo "- Terraform plan: archived for dev, stage, prod"
+            echo ""
+            echo "### Changes"
+            if [[ -n "$prev_tag" ]]; then
+              git log --pretty=format:"- %s (%h)" "${prev_tag}..${tag}"
+            else
+              git log --pretty=format:"- %s (%h)" -n 20
+            fi
+          } > release-notes.md
+          echo "notes-file=release-notes.md" >> "$GITHUB_OUTPUT"
+
+      - name: Download plan artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: tfplan-*-${{ github.run_id }}
+          merge-multiple: true
+          path: release-artifacts/plans
+        continue-on-error: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          body_path: release-notes.md
+          generate_release_notes: true
+          files: |
+            release-artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ github.ref_name }}
+          path: |
+            release-notes.md
+            release-artifacts/
+          retention-days: 90
+          if-no-files-found: ignore

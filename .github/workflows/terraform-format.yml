@@ -1,0 +1,51 @@
+name: Terraform Format
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - ".github/workflows/terraform-format.yml"
+      - ".github/actions/**"
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  TF_VERSION: "1.13.0"
+
+jobs:
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format Check
+        run: terraform fmt -recursive -check -diff
+
+      - name: Write format result
+        if: always()
+        run: echo "Terraform format check completed with status ${GITHUB_JOB_STATUS}." > format-result.log
+
+      - name: Upload format log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: format-log-${{ github.run_id }}
+          path: format-result.log
+          retention-days: 7

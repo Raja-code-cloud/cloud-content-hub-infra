@@ -1,0 +1,21 @@
+# Checkov configuration for cloud-content-hub-infra
+# https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html
+
+quiet: false
+compact: true
+
+framework:
+  - terraform
+
+skip-path:
+  - .terraform
+  - examples
+
+download-external-modules: false
+
+# CI enforces hard-fail on HIGH/CRITICAL via workflow CLI flags.
+soft-fail: false
+
+# Custom skips will be added per-module as implementation progresses
+# skip-check:
+#   - CKV_AZURE_*

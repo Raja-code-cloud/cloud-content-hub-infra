@@ -1,0 +1,112 @@
+name: Terraform Validate
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - ".github/workflows/terraform-validate.yml"
+      - ".github/actions/**"
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  TF_VERSION: "1.13.0"
+
+jobs:
+  validate:
+    name: Validate (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - dev
+          - stage
+          - prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: environments/${{ matrix.environment }}
+
+      - name: Terraform Init
+        working-directory: environments/${{ matrix.environment }}
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Validate
+        working-directory: environments/${{ matrix.environment }}
+        run: terraform validate -no-color
+
+      - name: Upload validation log
+        if: always()
+        working-directory: environments/${{ matrix.environment }}
+        run: terraform validate -no-color > "${{ runner.temp }}/validate-${{ matrix.environment }}.log" 2>&1 || true
+
+      - name: Upload validation artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validate-log-${{ matrix.environment }}
+          path: ${{ runner.temp }}/validate-${{ matrix.environment }}.log
+          retention-days: 14
+          if-no-files-found: ignore
+
+  validate-modules:
+    name: Validate Modules
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - common
+          - resource-group
+          - naming
+          - networking
+          - managed-identity
+          - key-vault
+          - storage
+          - acr
+          - container-app-environment
+          - container-app
+          - postgresql-flexible-server
+          - postgres
+          - redis
+          - log-analytics
+          - application-insights
+          - role-assignment
+          - key-vault-secrets
+          - monitor
+          - alerts
+          - budget
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: ./.github/actions/setup-terraform
+        with:
+          terraform-version: ${{ env.TF_VERSION }}
+          working-directory: modules/${{ matrix.module }}
+
+      - name: Terraform Init
+        working-directory: modules/${{ matrix.module }}
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Validate
+        working-directory: modules/${{ matrix.module }}
+        run: terraform validate -no-color

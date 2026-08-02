@@ -1,0 +1,31 @@
+﻿# Shared Foundation Variable Template
+#
+# Copy to terraform.tfvars in the target environment directory.
+# Never commit terraform.tfvars to version control.
+#
+# See: docs/terraform/shared-foundation.md
+
+# --- Environment identity ---
+environment     = "dev" # must match directory: dev | stage | prod
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# --- Naming ---
+project_name     = "cch"
+application_name = "cloud-content-hub"
+location         = "eastus"
+# location_short   = "eus"   # optional override
+# resource_prefix  = "cch-dev" # optional override
+
+# --- Organizational tags (required) ---
+owner         = "platform-engineering"
+business_unit = "engineering"
+cost_center   = "ENG-001"
+
+# --- Optional metadata ---
+repository_name = "cloud-content-hub-infra"
+managed_by      = "terraform"
+created_by      = "platform-engineering"
+
+# --- Supplementary tags ---
+tags            = {}
+additional_tags = {}

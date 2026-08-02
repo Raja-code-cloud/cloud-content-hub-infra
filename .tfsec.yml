@@ -1,0 +1,8 @@
+# tfsec configuration for cloud-content-hub-infra
+# https://aquasecurity.github.io/tfsec/
+
+minimum_severity: HIGH
+
+exclude:
+  # Add justified exclusions with ADR references as needed
+  # - AVDD-AZU-0001

@@ -1,0 +1,60 @@
+﻿# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Sensitive files
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+*.secret
+*.auto.tfvars
+!*.auto.tfvars.example
+
+# Environment-specific overrides (keep examples tracked)
+terraform.tfvars
+!terraform.tfvars.example
+
+# OS generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.idea/
+*.swp
+*.swo
+*~
+.vscode/settings.json
+
+# Logs and temp files
+*.log
+tmp/
+temp/
+.cache/
+
+# Test and coverage artifacts
+coverage/
+*.test
+
+# Local tooling
+.tflint.d/
+.mise/
