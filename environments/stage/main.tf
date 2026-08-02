@@ -49,41 +49,7 @@ module "networking" {
   vnet_name           = module.common.resource_names["vnet"]
   address_space       = local.network_address_space
   tags                = module.common.tags
-
-  subnets = [
-    {
-      key                               = "private-endpoints"
-      name                              = module.common.resource_names["subnet_pe"]
-      address_prefixes                  = ["10.20.1.0/24"]
-      private_endpoint_network_policies = "Disabled"
-    },
-    {
-      key                               = "postgres"
-      name                              = module.common.resource_names["subnet_pg"]
-      address_prefixes                  = ["10.20.2.0/24"]
-      private_endpoint_network_policies = "Disabled"
-      delegations = [{
-        name = "postgres-delegation"
-        service_delegation = {
-          name    = "Microsoft.DBforPostgreSQL/flexibleServers"
-          actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-        }
-      }]
-    },
-    {
-      key                               = "container-apps"
-      name                              = module.common.resource_names["subnet_cae"]
-      address_prefixes                  = ["10.20.3.0/24"]
-      private_endpoint_network_policies = "Disabled"
-      delegations = [{
-        name = "container-apps-delegation"
-        service_delegation = {
-          name    = "Microsoft.App/environments"
-          actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-        }
-      }]
-    },
-  ]
+  subnets             = local.networking_subnet_definitions
 }
 
 module "private_dns" {

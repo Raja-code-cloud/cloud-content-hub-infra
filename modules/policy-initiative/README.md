@@ -190,10 +190,11 @@ module "policy_initiative_cost_optimization" {
         }
       },
       {
-        policy_definition_id = "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a12"
-        reference_id         = "disk-premium-restrict"
+        policy_definition_id = "/providers/Microsoft.Authorization/policyDefinitions/73c1dd06-444a-4104-8d6d-14589b7560a7"
+        reference_id         = "allowed-vm-skus"
         parameters = {
-          effect = { value = "Audit" }
+          listOfAllowedSKUs = { value = ["Standard_B2s", "Standard_D2s_v3"] }
+          effect            = { value = "Audit" }
         }
       },
     ]

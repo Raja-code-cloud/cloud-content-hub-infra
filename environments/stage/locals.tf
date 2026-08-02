@@ -71,6 +71,41 @@ locals {
 
   network_address_space = ["10.20.0.0/16"]
 
+  networking_subnet_definitions = local.networking_enabled ? [
+    {
+      key                               = "private-endpoints"
+      name                              = module.common.resource_names["subnet_pe"]
+      address_prefixes                  = ["10.20.1.0/24"]
+      private_endpoint_network_policies = "Disabled"
+    },
+    {
+      key                               = "postgres"
+      name                              = module.common.resource_names["subnet_pg"]
+      address_prefixes                  = ["10.20.2.0/24"]
+      private_endpoint_network_policies = "Disabled"
+      delegations = [{
+        name = "postgres-delegation"
+        service_delegation = {
+          name    = "Microsoft.DBforPostgreSQL/flexibleServers"
+          actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+        }
+      }]
+    },
+    {
+      key                               = "container-apps"
+      name                              = module.common.resource_names["subnet_cae"]
+      address_prefixes                  = ["10.20.3.0/24"]
+      private_endpoint_network_policies = "Disabled"
+      delegations = [{
+        name = "container-apps-delegation"
+        service_delegation = {
+          name    = "Microsoft.App/environments"
+          actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+        }
+      }]
+    },
+  ] : []
+
   private_dns_zone_names = [
     "privatelink.vaultcore.azure.net",
     "privatelink.blob.core.windows.net",
