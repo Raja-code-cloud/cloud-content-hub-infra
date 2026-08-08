@@ -249,4 +249,55 @@ terraform import 'module.key_vault_secrets.azurerm_key_vault_secret.this["postgr
 - [Shared Foundation](../../docs/terraform/shared-foundation.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_key_vault_secret.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_key_vault_id"></a> [key\_vault\_id](#input\_key\_vault\_id) | Resource ID of the existing Key Vault. This module does not create the Key Vault. | `string` | n/a | yes |
+| <a name="input_secrets"></a> [secrets](#input\_secrets) | List of secrets to manage in the Key Vault. Values are sensitive and stored in Terraform state. | <pre>list(object({<br/>    key             = string<br/>    name            = string<br/>    value           = string<br/>    content_type    = optional(string)<br/>    expiration_date = optional(string)<br/>    not_before_date = optional(string)<br/>    tags            = optional(map(string), {})<br/>    enabled         = optional(bool, true)<br/>  }))</pre> | `[]` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_secret_ids"></a> [secret\_ids](#output\_secret\_ids) | Map of secret keys to versioned Key Vault secret ARM resource IDs. |
+| <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of secret keys to Key Vault secret names. |
+| <a name="output_secret_uris"></a> [secret\_uris](#output\_secret\_uris) | Map of secret keys to versioned Key Vault secret URIs (https://{vault}.vault.azure.net/secrets/{name}/{version}). |
+| <a name="output_secret_versionless_ids"></a> [secret\_versionless\_ids](#output\_secret\_versionless\_ids) | Map of secret keys to versionless secret IDs for Key Vault reference integrations. |
+| <a name="output_secret_versions"></a> [secret\_versions](#output\_secret\_versions) | Map of secret keys to current secret version identifiers. |
+| <a name="output_secrets"></a> [secrets](#output\_secrets) | Non-sensitive secret metadata for downstream module composition. Never includes secret values. |
 <!-- END_TF_DOCS -->

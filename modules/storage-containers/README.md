@@ -252,3 +252,58 @@ Use separate containers for workloads with different retention or tier requireme
 - [Storage Account Module](../storage/README.md)
 - [Role Assignment Module](../role-assignment/README.md)
 - [Diagnostic Settings Module](../diagnostic-settings/README.md)
+
+<!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_storage_container.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_container) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_containers"></a> [containers](#input\_containers) | List of blob containers to create in the existing Storage Account. Each entry requires a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                   = string<br/>    name                  = string<br/>    container_access_type = optional(string, "private")<br/>    metadata              = optional(map(string), {})<br/>    immutability_policy = optional(object({<br/>      immutability_period_in_days   = number<br/>      state                         = string<br/>      allow_protected_append_writes = optional(bool, false)<br/>    }))<br/>    legal_hold = optional(bool)<br/>  }))</pre> | `[]` | no |
+| <a name="input_primary_blob_endpoint"></a> [primary\_blob\_endpoint](#input\_primary\_blob\_endpoint) | Primary blob endpoint from the storage account module. When omitted, container URLs use the public Azure cloud naming convention. | `string` | `null` | no |
+| <a name="input_storage_account_id"></a> [storage\_account\_id](#input\_storage\_account\_id) | Resource ID of the existing Storage Account. Required by azurerm v5 for container binding. | `string` | n/a | yes |
+| <a name="input_storage_account_name"></a> [storage\_account\_name](#input\_storage\_account\_name) | Name of the existing Storage Account. This module does not create the Storage Account. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags merged into each container metadata map. Blob containers do not support Azure Resource Manager tags directly. | `map(string)` | `{}` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_container_ids"></a> [container\_ids](#output\_container\_ids) | Map of container keys to Azure blob container resource IDs. |
+| <a name="output_container_names"></a> [container\_names](#output\_container\_names) | Map of container keys to blob container names. |
+| <a name="output_container_urls"></a> [container\_urls](#output\_container\_urls) | Map of container keys to blob container URLs. |
+| <a name="output_containers"></a> [containers](#output\_containers) | Non-sensitive container metadata for downstream module composition. |
+<!-- END_TF_DOCS -->

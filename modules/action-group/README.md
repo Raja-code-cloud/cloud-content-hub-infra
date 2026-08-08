@@ -337,3 +337,56 @@ Use email/webhook in development; reserve SMS/voice for production critical path
 
 - [Monitor Alerts Module](../monitor-alerts/README.md)
 - [Diagnostic Settings Module](../diagnostic-settings/README.md)
+
+<!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_monitor_action_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_action_groups"></a> [action\_groups](#input\_action\_groups) | List of Azure Monitor action groups. Each entry requires a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                 = string<br/>    action_group_name   = string<br/>    resource_group_name = string<br/>    short_name          = string<br/>    enabled             = optional(bool, true)<br/>    tags                = optional(map(string), {})<br/>    email_receivers = optional(list(object({<br/>      name                    = string<br/>      email_address           = string<br/>      use_common_alert_schema = optional(bool, false)<br/>    })), [])<br/>    sms_receivers = optional(list(object({<br/>      name         = string<br/>      country_code = string<br/>      phone_number = string<br/>    })), [])<br/>    voice_receivers = optional(list(object({<br/>      name         = string<br/>      country_code = string<br/>      phone_number = string<br/>    })), [])<br/>    webhook_receivers = optional(list(object({<br/>      name                    = string<br/>      service_uri             = string<br/>      use_common_alert_schema = optional(bool, false)<br/>      aad_auth = optional(object({<br/>        object_id      = string<br/>        identifier_uri = optional(string)<br/>        tenant_id      = optional(string)<br/>      }))<br/>    })), [])<br/>    azure_function_receivers = optional(list(object({<br/>      name                     = string<br/>      function_app_resource_id = string<br/>      function_name            = string<br/>      http_trigger_url         = string<br/>      use_common_alert_schema  = optional(bool, false)<br/>    })), [])<br/>    logic_app_receivers = optional(list(object({<br/>      name                    = string<br/>      resource_id             = string<br/>      callback_url            = string<br/>      use_common_alert_schema = optional(bool, false)<br/>    })), [])<br/>    automation_runbook_receivers = optional(list(object({<br/>      name                    = string<br/>      automation_account_id   = string<br/>      runbook_name            = string<br/>      webhook_resource_id     = string<br/>      service_uri             = string<br/>      is_global_runbook       = optional(bool, false)<br/>      use_common_alert_schema = optional(bool, false)<br/>    })), [])<br/>    arm_role_receivers = optional(list(object({<br/>      name                    = string<br/>      role_id                 = string<br/>      use_common_alert_schema = optional(bool, false)<br/>    })), [])<br/>    eventhub_receivers = optional(list(object({<br/>      name                    = string<br/>      event_hub_namespace     = string<br/>      event_hub_name          = string<br/>      subscription_id         = string<br/>      use_common_alert_schema = optional(bool, false)<br/>    })), [])<br/>    azure_app_push_receivers = optional(list(object({<br/>      name          = string<br/>      email_address = string<br/>    })), [])<br/>    itsm_receivers = optional(list(object({<br/>      name                 = string<br/>      workspace_id         = string<br/>      connection_id        = string<br/>      ticket_configuration = string<br/>      region               = string<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_action_group_ids"></a> [action\_group\_ids](#output\_action\_group\_ids) | Map of action group keys to Azure action group resource IDs. |
+| <a name="output_action_group_names"></a> [action\_group\_names](#output\_action\_group\_names) | Map of action group keys to action group names. |
+| <a name="output_action_groups"></a> [action\_groups](#output\_action\_groups) | Non-sensitive action group metadata for downstream module composition. |
+| <a name="output_receiver_summary"></a> [receiver\_summary](#output\_receiver\_summary) | Non-sensitive per-group receiver counts by channel type. |
+| <a name="output_resource_ids"></a> [resource\_ids](#output\_resource\_ids) | Map of action group keys to Azure resource IDs (same as action\_group\_ids). |
+| <a name="output_short_names"></a> [short\_names](#output\_short\_names) | Map of action group keys to short names used in SMS notifications. |
+<!-- END_TF_DOCS -->

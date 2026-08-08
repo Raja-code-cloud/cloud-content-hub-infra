@@ -52,14 +52,17 @@ EOF
   " || failed=1
 
   if command -v tflint >/dev/null 2>&1; then
-    run_gate "Lint" bash -c "tflint --init && tflint --recursive" || failed=1
+    run_gate "Lint" bash -c "
+      source '${REPO_ROOT}/tests/scripts/lib/common.sh'
+      run_tflint_recursive compact
+    " || failed=1
   else
     echo "| Lint | skipped (tflint not installed) |" >> "$SUMMARY_FILE"
     log_warn "TFLint not installed — skipping"
   fi
 
   if command -v checkov >/dev/null 2>&1; then
-    run_gate "Security (Checkov)" checkov -d . --framework terraform --quiet || failed=1
+    run_gate "Security (Checkov)" checkov -d . --framework terraform --config-file .checkov.yml --quiet || failed=1
   else
     echo "| Security (Checkov) | skipped |" >> "$SUMMARY_FILE"
     log_warn "Checkov not installed — skipping"

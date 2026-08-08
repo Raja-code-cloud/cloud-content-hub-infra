@@ -4,8 +4,8 @@
 # Providers are configured exclusively at the environment root level.
 # Child modules inherit these providers automatically.
 #
-# Authentication is NOT configured here. CI/CD will authenticate via
-# GitHub Actions OpenID Connect (OIDC) in a later phase.
+# Authentication is NOT configured here. CI/CD authenticates via
+# GitHub Actions OpenID Connect (OIDC). See .github/actions/azure-terraform.
 #
 # See: docs/terraform/provider-inheritance.md
 # ------------------------------------------------------------------------------

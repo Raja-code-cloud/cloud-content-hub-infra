@@ -530,3 +530,62 @@ Scheduled query alerts evaluate KQL against Log Analytics data, which may incur 
 - [Application Insights Module](../application-insights/README.md)
 - [Diagnostic Settings Module](../diagnostic-settings/README.md)
 - [Log Analytics Module](../log-analytics/README.md)
+
+<!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_monitor_metric_alert.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_metric_alert) | resource |
+| [azurerm_monitor_scheduled_query_rules_alert_v2.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_scheduled_query_rules_alert_v2) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_action_group_ids"></a> [action\_group\_ids](#input\_action\_group\_ids) | List of existing Azure Monitor action group resource IDs to notify when alerts fire. | `list(string)` | `[]` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for scheduled query alert rules. Required when scheduled\_query\_alerts are defined. | `string` | `""` | no |
+| <a name="input_metric_alerts"></a> [metric\_alerts](#input\_metric\_alerts) | List of Azure Monitor metric alert rules. Each entry requires a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                  = string<br/>    name                 = string<br/>    description          = optional(string)<br/>    target_resource_id   = string<br/>    metric_namespace     = string<br/>    metric_name          = string<br/>    aggregation          = string<br/>    operator             = string<br/>    threshold            = number<br/>    severity             = number<br/>    window_size          = string<br/>    evaluation_frequency = string<br/>    enabled              = optional(bool, true)<br/>    auto_mitigate        = optional(bool, true)<br/>    dimensions = optional(list(object({<br/>      name     = string<br/>      operator = string<br/>      values   = list(string)<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Resource group where alert rules are deployed. | `string` | n/a | yes |
+| <a name="input_scheduled_query_alerts"></a> [scheduled\_query\_alerts](#input\_scheduled\_query\_alerts) | List of Azure Monitor scheduled query (log) alert rules. Each entry requires a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                  = string<br/>    name                 = string<br/>    description          = optional(string)<br/>    workspace_id         = string<br/>    kql_query            = string<br/>    severity             = number<br/>    evaluation_frequency = string<br/>    window_size          = string<br/>    threshold            = number<br/>    operator             = string<br/>    time_aggregation     = string<br/>    enabled              = optional(bool, true)<br/>  }))</pre> | `[]` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to all alert rules created by this module. | `map(string)` | `{}` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_alert_names"></a> [alert\_names](#output\_alert\_names) | Map of alert keys to alert rule names across metric and scheduled query alerts. |
+| <a name="output_metric_alert_ids"></a> [metric\_alert\_ids](#output\_metric\_alert\_ids) | Map of metric alert keys to Azure metric alert resource IDs. |
+| <a name="output_metric_alerts"></a> [metric\_alerts](#output\_metric\_alerts) | Non-sensitive metric alert metadata for downstream module composition. |
+| <a name="output_scheduled_query_alert_ids"></a> [scheduled\_query\_alert\_ids](#output\_scheduled\_query\_alert\_ids) | Map of scheduled query alert keys to Azure scheduled query alert resource IDs. |
+| <a name="output_scheduled_query_alerts"></a> [scheduled\_query\_alerts](#output\_scheduled\_query\_alerts) | Non-sensitive scheduled query alert metadata for downstream module composition. |
+| <a name="output_target_resources"></a> [target\_resources](#output\_target\_resources) | Map of alert keys to monitored target resource or workspace IDs. |
+<!-- END_TF_DOCS -->

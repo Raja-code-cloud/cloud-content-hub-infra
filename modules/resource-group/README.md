@@ -153,4 +153,61 @@ Azure Resource Groups are **free**. Management locks have **no additional cost**
 - [Example: Common Usage](../../examples/common-usage/README.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) | resource |
+| [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_create_resource_lock"></a> [create\_resource\_lock](#input\_create\_resource\_lock) | When true, creates an Azure Management Lock on the resource group. | `bool` | `false` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region where the resource group is created. | `string` | n/a | yes |
+| <a name="input_lock_level"></a> [lock\_level](#input\_lock\_level) | Management lock level applied when create\_resource\_lock is true. Supported values: CanNotDelete, ReadOnly. | `string` | `"CanNotDelete"` | no |
+| <a name="input_lock_name"></a> [lock\_name](#input\_lock\_name) | Optional name for the management lock. Defaults to <resource-group-name>-lock when null. | `string` | `null` | no |
+| <a name="input_lock_notes"></a> [lock\_notes](#input\_lock\_notes) | Optional notes recorded on the management lock. | `string` | `"Managed by Terraform — prevents accidental deletion of platform resources."` | no |
+| <a name="input_name"></a> [name](#input\_name) | Name of the Azure Resource Group. Must be supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to the resource group. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_id"></a> [id](#output\_id) | The ID of the Azure Resource Group. |
+| <a name="output_location"></a> [location](#output\_location) | The Azure region of the Resource Group. |
+| <a name="output_lock_id"></a> [lock\_id](#output\_lock\_id) | The ID of the management lock when create\_resource\_lock is true. Null when no lock is created. |
+| <a name="output_lock_level"></a> [lock\_level](#output\_lock\_level) | The applied management lock level when create\_resource\_lock is true. Null when no lock is created. |
+| <a name="output_name"></a> [name](#output\_name) | The name of the Azure Resource Group. |
+| <a name="output_resource_group"></a> [resource\_group](#output\_resource\_group) | Resource group object containing id, name, location, and tags. |
 <!-- END_TF_DOCS -->

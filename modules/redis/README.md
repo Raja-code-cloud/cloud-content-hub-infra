@@ -1,6 +1,6 @@
 ﻿# Azure Cache for Redis Module
 
-> Reusable Terraform module for Azure Cache for Redis.
+Creates exactly one Azure Cache for Redis instance used by Cloud Content Hub AI for Celery broker/result backend and readiness checks (`CCH_REDIS_URL`).
 
 ## Usage
 
@@ -8,24 +8,24 @@
 module "redis" {
   source = "../../modules/redis"
 
-  # Configure module inputs
+  redis_cache_name    = module.common.resource_names["redis"]
+  resource_group_name = module.resource_group.name
+  location            = module.common.location
+  tags                = module.common.tags
+
+  sku_name = "Basic"
+  family   = "C"
+  capacity = 0
 }
 ```
 
-## Requirements
+## Notes
 
-| Name | Version |
-|------|---------|
-| terraform | >= 1.5.0 |
-| azurerm | >= 3.0.0 |
+- TLS-only access is the default (`non_ssl_port_enabled = false`).
+- `redis_url` output is formatted for `CCH_REDIS_URL` (`rediss://:...@host:6380/0`).
+- Private endpoint connectivity requires Premium SKU and `public_network_access_enabled = false`.
+- This module does **not** create private endpoints, DNS zones, diagnostics, or RBAC.
 
-## Inputs
+## Inputs / Outputs
 
-_No inputs defined yet._
-
-## Outputs
-
-_No outputs defined yet._
-
-<!-- BEGIN_TF_DOCS -->
-<!-- END_TF_DOCS -->
+See `variables.tf` and `outputs.tf`.

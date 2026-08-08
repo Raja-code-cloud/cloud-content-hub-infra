@@ -74,7 +74,7 @@ variable "resource_type" {
 
   validation {
     condition = var.resource_type == null ? true : contains([
-      "acr", "cae", "api", "storage", "postgres", "redis", "key_vault",
+      "acr", "cae", "api", "worker", "beat", "migrate", "storage", "postgres", "redis", "key_vault",
       "vnet", "subnet", "identity", "log_analytics", "app_insights",
       "monitor", "alerts", "budget", "resource_group",
     ], var.resource_type)

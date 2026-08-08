@@ -21,7 +21,7 @@ require_command terraform
 run_gate "$SUITE" "terraform fmt" terraform_fmt_check || FAILED=1
 
 if command -v tflint >/dev/null 2>&1; then
-  run_gate "$SUITE" "tflint" bash -c "tflint --init >/dev/null 2>&1 || true; tflint --recursive --format compact" || FAILED=1
+  run_gate "$SUITE" "tflint" bash -c "source '${SCRIPT_DIR}/lib/common.sh'; run_tflint_recursive compact" || FAILED=1
 else
   record_result "$SUITE" "tflint" "skipped" "tflint not installed"
   log_warn "Skipping tflint (not installed)"

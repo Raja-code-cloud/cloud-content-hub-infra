@@ -465,4 +465,57 @@ Store initiative definitions in environment `locals.tf` or dedicated governance 
 - Repository `policies/` directory for custom policy definitions
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.13.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.0 |
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_management_group_policy_set_definition.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_group_policy_set_definition) | resource |
+| [azurerm_policy_set_definition.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/policy_set_definition) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_initiatives"></a> [initiatives](#input\_initiatives) | List of Azure Policy initiatives (policy set definitions). Each entry must include a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                 = string<br/>    name                = string<br/>    display_name        = string<br/>    description         = optional(string)<br/>    management_group_id = optional(string)<br/>    policy_type         = string<br/>    metadata            = optional(map(any))<br/>    parameters          = optional(map(any))<br/>    policy_definitions = list(object({<br/>      policy_definition_id = string<br/>      reference_id         = optional(string)<br/>      parameters           = optional(map(any))<br/>      group_names          = optional(list(string))<br/>      version              = optional(string)<br/>    }))<br/>    policy_groups = optional(list(object({<br/>      name                            = string<br/>      display_name                    = optional(string)<br/>      description                     = optional(string)<br/>      category                        = optional(string)<br/>      additional_metadata_resource_id = optional(string)<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_initiative_ids"></a> [initiative\_ids](#output\_initiative\_ids) | Map of initiative keys to Azure Policy Initiative resource IDs. |
+| <a name="output_initiative_names"></a> [initiative\_names](#output\_initiative\_names) | Map of initiative keys to Azure Policy Initiative resource names. |
+| <a name="output_initiatives"></a> [initiatives](#output\_initiatives) | Non-sensitive initiative metadata for downstream module composition. |
+| <a name="output_policy_definition_counts"></a> [policy\_definition\_counts](#output\_policy\_definition\_counts) | Map of initiative keys to the number of referenced policy definitions. |
+| <a name="output_policy_definition_references"></a> [policy\_definition\_references](#output\_policy\_definition\_references) | Map of initiative keys to referenced policy definition metadata. |
 <!-- END_TF_DOCS -->

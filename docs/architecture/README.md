@@ -15,16 +15,17 @@ This document describes the high-level infrastructure architecture for the Cloud
 | Capability | dev | stage | prod |
 |------------|:---:|:-----:|:----:|
 | Core platform (RG, LA, App Insights, MI, ACR, KV, Storage, PostgreSQL) | Yes | Yes | Yes |
+| Azure Cache for Redis | Yes | Yes | Yes |
 | PostgreSQL database module | Yes | Yes | Yes |
+| API / worker / beat Container Apps | Yes | Yes | Yes |
+| Migration Container Apps Job | Yes | Yes | Yes |
 | Private networking / VNet | No | Yes | Yes |
-| Private endpoints | No | Yes | Yes |
+| Private endpoints (incl. Redis when enabled) | No | Yes | Yes |
 | Governance (policy, budget) | No | Yes | Yes |
 | Monitoring (action groups, alerts) | No | Yes | Yes |
 | Diagnostic settings | No | Yes | Yes |
 | Resource lock | No | Yes | Yes |
 | Custom policy initiative | No | No | Yes |
-
-**Note:** Redis is not implemented. The `modules/redis` directory is a deprecated placeholder.
 
 ## Reference Architecture (stage / prod)
 
@@ -42,6 +43,9 @@ This document describes the high-level infrastructure architecture for the Cloud
 |  |  +-------------+  +-------------+  +--------------------+  |  |
 |  |  +-------------+  +-------------+  +--------------------+  |  |
 |  |  | PostgreSQL  |  |   Storage   |  | Private Endpoints  |  |  |
+|  |  +-------------+  +-------------+  +--------------------+  |  |
+|  |  +-------------+  +-------------+  +--------------------+  |  |
+|  |  |   Redis     |  | Worker/Beat |  | Migration Job      |  |  |
 |  |  +-------------+  +-------------+  +--------------------+  |  |
 |  |  +------------------------------------------------------+  |  |
 |  |  | Log Analytics | App Insights | Monitor Alerts       |  |  |
@@ -61,11 +65,12 @@ When composing resources, wire modules in this order:
 5. `log-analytics` → `application-insights`
 6. `managed-identity`, `acr`, `key-vault`, `storage` → `storage-containers`
 7. `postgresql-flexible-server` → `postgresql-database`, `postgresql-configuration`
-8. `container-app-environment` → `private-endpoint` (when enabled)
-9. `role-assignment` → `key-vault-secrets`
-10. `policy-initiative` → `policy-assignment`, `budget` (when governance enabled)
-11. `action-group`, `monitor-alerts`, `diagnostic-settings` (when monitoring enabled)
-12. `container-app`
+8. `redis`
+9. `container-app-environment` → `private-endpoint` (when enabled)
+10. `role-assignment` → `key-vault-secrets` (includes `CCH-DATABASE-URL`, `CCH-REDIS-URL`, `CCH-MIGRATION-DATABASE-URL`)
+11. `policy-initiative` → `policy-assignment`, `budget` (when governance enabled)
+12. `action-group`, `monitor-alerts`, `diagnostic-settings` (when monitoring enabled)
+13. `container-app` (API) → `container-app` (worker/beat) → `container-app-job` (migrate)
 
 ### Deprecated modules (do not use)
 
@@ -74,7 +79,6 @@ When composing resources, wire modules in this order:
 | `postgres` | `postgresql-flexible-server` |
 | `monitor` | `diagnostic-settings`, `action-group`, `monitor-alerts` |
 | `alerts` | `action-group`, `monitor-alerts` |
-| `redis` | Not implemented |
 
 ## Environment Strategy
 

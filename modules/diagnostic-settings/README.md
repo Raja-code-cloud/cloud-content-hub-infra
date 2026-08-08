@@ -373,3 +373,54 @@ Future resources are supported without module changes — pass the resource ID a
 - [Log Analytics Module](../log-analytics/README.md)
 - [Storage Module](../storage/README.md)
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
+
+<!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_monitor_diagnostic_setting.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings) | List of Azure Monitor diagnostic settings. Each entry requires a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                             = string<br/>    diagnostic_name                 = string<br/>    target_resource_id              = string<br/>    log_analytics_workspace_id      = optional(string)<br/>    storage_account_id              = optional(string)<br/>    eventhub_authorization_rule_id  = optional(string)<br/>    eventhub_name                   = optional(string)<br/>    marketplace_partner_resource_id = optional(string)<br/>    log_analytics_destination_type  = optional(string)<br/>    logs = optional(list(object({<br/>      category       = optional(string)<br/>      category_group = optional(string)<br/>      enabled        = optional(bool, true)<br/>    })), [])<br/>    metrics = optional(list(object({<br/>      category = string<br/>      enabled  = optional(bool, true)<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_diagnostic_setting_ids"></a> [diagnostic\_setting\_ids](#output\_diagnostic\_setting\_ids) | Map of diagnostic setting keys to Azure diagnostic setting resource IDs. |
+| <a name="output_diagnostic_setting_names"></a> [diagnostic\_setting\_names](#output\_diagnostic\_setting\_names) | Map of diagnostic setting keys to diagnostic setting names. |
+| <a name="output_diagnostic_settings"></a> [diagnostic\_settings](#output\_diagnostic\_settings) | Non-sensitive diagnostic setting metadata for downstream module composition. |
+| <a name="output_target_resource_ids"></a> [target\_resource\_ids](#output\_target\_resource\_ids) | Map of diagnostic setting keys to target resource IDs. |
+<!-- END_TF_DOCS -->

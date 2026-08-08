@@ -6,7 +6,7 @@
 set -euo pipefail
 
 readonly RELEASE_FRAMEWORK_VERSION="1.0.0"
-readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 
 # shellcheck source=../../deployment/scripts/lib/common.sh
 source "${REPO_ROOT}/deployment/scripts/lib/common.sh"

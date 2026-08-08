@@ -130,6 +130,20 @@ module "postgresql_database" {
   depends_on = [module.postgresql_flexible_server]
 }
 
+module "redis" {
+  source = "../../modules/redis"
+
+  redis_cache_name    = module.common.resource_names["redis"]
+  resource_group_name = module.resource_group.name
+  location            = module.common.location
+  tags                = module.common.tags
+
+  sku_name                      = "Basic"
+  family                        = "C"
+  capacity                      = 0
+  public_network_access_enabled = true
+}
+
 # --- Compute Platform ----------------------------------------------------------
 
 module "container_app_environment" {
@@ -165,32 +179,13 @@ module "key_vault_secrets" {
   source = "../../modules/key-vault-secrets"
 
   key_vault_id = module.key_vault.resource_id
-
-  secrets = [
-    {
-      key          = "postgres-admin-password"
-      name         = "postgres-admin-password"
-      value        = var.postgresql_admin_password
-      content_type = "password"
-      tags = {
-        purpose = "database"
-        engine  = "postgresql"
-      }
-    },
-    {
-      key          = "api-key-placeholder"
-      name         = "api-key-placeholder"
-      value        = var.api_key_placeholder
-      content_type = "api-key"
-      tags = {
-        purpose = "application"
-      }
-    },
-  ]
+  secrets      = local.key_vault_secrets
 
   depends_on = [
     module.key_vault,
     module.role_assignment,
+    module.postgresql_flexible_server,
+    module.redis,
   ]
 }
 
@@ -214,20 +209,16 @@ module "container_app" {
     identity = module.managed_identity.resource_id
   }]
 
+  secrets = local.container_app_key_vault_secret_refs
+
   containers = [{
-    name   = "api"
-    image  = local.container_image
-    cpu    = 0.5
-    memory = "1.0Gi"
-    env = [{
-      name  = "ASPNETCORE_ENVIRONMENT"
-      value = "Development"
-    }]
-    readiness_probe = {
-      transport = "HTTP"
-      port      = var.container_target_port
-      path      = "/health"
-    }
+    name            = "api"
+    image           = local.api_container_image
+    cpu             = 0.5
+    memory          = "1.0Gi"
+    env             = local.api_env
+    liveness_probe  = local.api_probes.liveness
+    readiness_probe = local.api_probes.readiness
   }]
 
   scale = {
@@ -252,7 +243,153 @@ module "container_app" {
   depends_on = [
     module.container_app_environment,
     module.role_assignment,
+    module.key_vault_secrets,
     module.application_insights,
+    module.acr,
+    module.managed_identity,
+  ]
+}
+
+module "container_app_worker" {
+  source = "../../modules/container-app"
+
+  container_app_name           = module.common.resource_names["worker"]
+  resource_group_name          = module.resource_group.name
+  container_app_environment_id = module.container_app_environment.id
+  tags                         = module.common.tags
+
+  identity = {
+    type         = "UserAssigned"
+    identity_ids = [module.managed_identity.resource_id]
+  }
+
+  registries = [{
+    server   = module.acr.login_server
+    identity = module.managed_identity.resource_id
+  }]
+
+  secrets = local.container_app_key_vault_secret_refs
+
+  containers = [{
+    name   = "worker"
+    image  = local.worker_container_image
+    cpu    = 0.5
+    memory = "1.0Gi"
+    env    = local.worker_env
+  }]
+
+  scale = {
+    min_replicas = 0
+    max_replicas = 3
+  }
+
+  ingress = null
+
+  depends_on = [
+    module.container_app_environment,
+    module.role_assignment,
+    module.key_vault_secrets,
+    module.acr,
+    module.managed_identity,
+  ]
+}
+
+module "container_app_beat" {
+  source = "../../modules/container-app"
+
+  container_app_name           = module.common.resource_names["beat"]
+  resource_group_name          = module.resource_group.name
+  container_app_environment_id = module.container_app_environment.id
+  tags                         = module.common.tags
+
+  identity = {
+    type         = "UserAssigned"
+    identity_ids = [module.managed_identity.resource_id]
+  }
+
+  registries = [{
+    server   = module.acr.login_server
+    identity = module.managed_identity.resource_id
+  }]
+
+  secrets = [
+    {
+      name                = "redis-url"
+      key_vault_secret_id = module.key_vault_secrets.secret_versionless_ids["cch-redis-url"]
+      identity            = module.managed_identity.resource_id
+    },
+  ]
+
+  containers = [{
+    name    = "beat"
+    image   = local.worker_container_image
+    cpu     = 0.25
+    memory  = "0.5Gi"
+    command = ["celery"]
+    args = [
+      "--app",
+      "cloud_content_hub.workers.runtime:celery_app",
+      "beat",
+      "--loglevel",
+      var.cch_log_level,
+      "--schedule",
+      "/tmp/celerybeat-schedule",
+    ]
+    env = local.beat_env
+  }]
+
+  scale = {
+    min_replicas = 1
+    max_replicas = 1
+  }
+
+  ingress = null
+
+  depends_on = [
+    module.container_app_environment,
+    module.role_assignment,
+    module.key_vault_secrets,
+    module.acr,
+    module.managed_identity,
+  ]
+}
+
+module "container_app_job_migrate" {
+  source = "../../modules/container-app-job"
+
+  job_name                     = module.common.resource_names["migrate"]
+  resource_group_name          = module.resource_group.name
+  location                     = module.common.location
+  container_app_environment_id = module.container_app_environment.id
+  tags                         = module.common.tags
+
+  identity = {
+    type         = "UserAssigned"
+    identity_ids = [module.managed_identity.resource_id]
+  }
+
+  registries = [{
+    server   = module.acr.login_server
+    identity = module.managed_identity.resource_id
+  }]
+
+  secrets = local.migration_job_key_vault_secret_refs
+
+  containers = [{
+    name    = "migrate"
+    image   = local.api_container_image
+    cpu     = 0.5
+    memory  = "1.0Gi"
+    command = ["alembic"]
+    args    = ["upgrade", "head"]
+    env     = local.migrate_env
+  }]
+
+  depends_on = [
+    module.container_app_environment,
+    module.role_assignment,
+    module.key_vault_secrets,
+    module.postgresql_database,
     module.acr,
     module.managed_identity,
   ]

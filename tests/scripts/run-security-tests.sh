@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # ------------------------------------------------------------------------------
-# Security scanning: Checkov, tfsec, Trivy, secret detection.
+# Security scanning: Checkov, Trivy, secret detection.
+# Note: tfsec was deprecated in favor of Checkov. See docs/terraform/DEPRECATED_TFSEC.md.
 # ------------------------------------------------------------------------------
 
 set -euo pipefail
@@ -26,15 +27,6 @@ if command -v checkov >/dev/null 2>&1; then
 else
   record_result "$SUITE" "checkov" "skipped" "checkov not installed"
   log_warn "Skipping checkov (not installed)"
-fi
-
-if command -v tfsec >/dev/null 2>&1; then
-  run_gate "$SUITE" "tfsec" bash -c \
-    "tfsec . --config-file .tfsec.yml --format json --out '${REPORTS_DIR}/tfsec.json'" \
-    || FAILED=1
-else
-  record_result "$SUITE" "tfsec" "skipped" "tfsec not installed"
-  log_warn "Skipping tfsec (not installed)"
 fi
 
 if command -v trivy >/dev/null 2>&1; then

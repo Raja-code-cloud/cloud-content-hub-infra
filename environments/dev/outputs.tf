@@ -62,6 +62,26 @@ output "postgresql_fqdn" {
   value       = module.postgresql_flexible_server.fqdn
 }
 
+output "redis_hostname" {
+  description = "Azure Cache for Redis hostname."
+  value       = module.redis.hostname
+}
+
+output "worker_container_app_name" {
+  description = "Celery worker Container App name."
+  value       = module.container_app_worker.name
+}
+
+output "beat_container_app_name" {
+  description = "Celery beat Container App name."
+  value       = module.container_app_beat.name
+}
+
+output "migration_job_name" {
+  description = "Manual Container Apps Job name for Alembic migrations."
+  value       = module.container_app_job_migrate.name
+}
+
 output "application_insights_connection_string" {
   description = "Application Insights connection string for application telemetry."
   value       = module.application_insights.connection_string

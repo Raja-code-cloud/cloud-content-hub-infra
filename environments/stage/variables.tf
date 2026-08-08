@@ -219,27 +219,41 @@ variable "api_key_placeholder" {
   default     = "replace-via-github-actions-secret"
 }
 
-# --- Container App -------------------------------------------------------------
+# --- Container App / CCH runtime -----------------------------------------------
 
 variable "container_image_name" {
-  description = "Container image repository name within ACR (without registry prefix or tag)."
+  description = "API container image repository name within ACR (without registry prefix or tag)."
   type        = string
   nullable    = false
-  default     = "api"
+  default     = "cloud-content-hub-api"
 }
 
 variable "container_image_tag" {
-  description = "Container image tag to deploy. Pin immutable tags for stage promotion."
+  description = "API container image tag to deploy. Pin immutable tags for stage promotion."
+  type        = string
+  nullable    = false
+  default     = "stage"
+}
+
+variable "worker_image_name" {
+  description = "Worker/beat container image repository name within ACR."
+  type        = string
+  nullable    = false
+  default     = "cloud-content-hub-worker"
+}
+
+variable "worker_image_tag" {
+  description = "Worker/beat container image tag to deploy."
   type        = string
   nullable    = false
   default     = "stage"
 }
 
 variable "container_target_port" {
-  description = "Container port exposed through ingress."
+  description = "API container port exposed through ingress. Cloud Content Hub AI listens on 8000."
   type        = number
   nullable    = false
-  default     = 8080
+  default     = 8000
 
   validation {
     condition     = var.container_target_port >= 1 && var.container_target_port <= 65535
@@ -248,8 +262,53 @@ variable "container_target_port" {
 }
 
 variable "container_ingress_external_enabled" {
-  description = "When true, exposes the Container App through external HTTPS ingress."
+  description = "When true, exposes the API Container App through external HTTPS ingress."
   type        = bool
   nullable    = false
   default     = true
+}
+
+variable "cch_environment" {
+  description = "Value for CCH_ENVIRONMENT (local|test|staging|production)."
+  type        = string
+  nullable    = false
+  default     = "staging"
+
+  validation {
+    condition     = contains(["local", "test", "staging", "production"], var.cch_environment)
+    error_message = "cch_environment must be one of: local, test, staging, production."
+  }
+}
+
+variable "cch_log_level" {
+  description = "Value for CCH_LOG_LEVEL."
+  type        = string
+  nullable    = false
+  default     = "INFO"
+}
+
+variable "cch_openapi_enabled" {
+  description = "Value for CCH_OPENAPI_ENABLED. Must be false in production."
+  type        = bool
+  nullable    = false
+  default     = true
+}
+
+variable "cch_http_allowed_origins" {
+  description = "CORS allow-list serialized into CCH_HTTP_ALLOWED_ORIGINS."
+  type        = list(string)
+  nullable    = false
+  default     = []
+}
+
+variable "celery_concurrency" {
+  description = "Celery worker concurrency (CELERY_CONCURRENCY)."
+  type        = number
+  nullable    = false
+  default     = 4
+
+  validation {
+    condition     = var.celery_concurrency >= 1 && var.celery_concurrency <= 32
+    error_message = "celery_concurrency must be between 1 and 32."
+  }
 }

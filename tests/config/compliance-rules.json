@@ -89,7 +89,7 @@
       "id": "CAF-SEC-001",
       "domain": "Security",
       "topic": "Secure configuration",
-      "validation": "tfsec_trivy_pass"
+      "validation": "checkov_trivy_pass"
     }
   ]
 }

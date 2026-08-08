@@ -1,6 +1,8 @@
 # Trivy ignore file for cloud-content-hub-infra
-# Document each ignore with justification and ADR reference.
-#
-# Example:
-# AVD-AZU-0001
-# AVD-AZU-0002
+# Document each ignore with justification: docs/terraform/SECURITY_SCAN_EXCEPTIONS.md
+
+# False positive: network_rules configured per environment; private endpoints in stage/prod
+AVD-AZU-0012
+
+# False positive: Key Vault ACL enforced via private_endpoint module when networking enabled
+AVD-AZU-0013

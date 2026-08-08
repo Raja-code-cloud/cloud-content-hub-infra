@@ -298,3 +298,71 @@ infrastructure_subnet_id = module.networking.subnet_ids["cae"]
 
 - [Container Apps Environment Module](../container-app-environment/README.md)
 - [PostgreSQL Flexible Server Module](../postgresql-flexible-server/README.md)
+
+<!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.13.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.0 |
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_network_security_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group) | resource |
+| [azurerm_subnet.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) | resource |
+| [azurerm_subnet_network_security_group_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_network_security_group_association) | resource |
+| [azurerm_virtual_network.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_address_space"></a> [address\_space](#input\_address\_space) | Address space for the Virtual Network as a list of CIDR blocks. | `list(string)` | n/a | yes |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for networking resources. | `string` | n/a | yes |
+| <a name="input_network_security_groups"></a> [network\_security\_groups](#input\_network\_security\_groups) | Optional Network Security Groups to create and associate via subnet nsg\_key. | <pre>list(object({<br/>    key  = string<br/>    name = string<br/>    tags = optional(map(string), {})<br/>    security_rules = optional(list(object({<br/>      name                         = string<br/>      priority                     = number<br/>      direction                    = string<br/>      access                       = string<br/>      protocol                     = string<br/>      source_port_range            = optional(string)<br/>      destination_port_range       = optional(string)<br/>      source_port_ranges           = optional(list(string))<br/>      destination_port_ranges      = optional(list(string))<br/>      source_address_prefix        = optional(string)<br/>      destination_address_prefix   = optional(string)<br/>      source_address_prefixes      = optional(list(string))<br/>      destination_address_prefixes = optional(list(string))<br/>      description                  = optional(string)<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where networking resources are created. | `string` | n/a | yes |
+| <a name="input_subnets"></a> [subnets](#input\_subnets) | Subnets to create within the Virtual Network. Each entry requires a stable key for for\_each identity. | <pre>list(object({<br/>    key                                           = string<br/>    name                                          = string<br/>    address_prefixes                              = list(string)<br/>    service_endpoints                             = optional(list(string), [])<br/>    service_endpoint_policy_ids                   = optional(list(string), [])<br/>    private_endpoint_network_policies             = optional(string)<br/>    private_link_service_network_policies_enabled = optional(bool)<br/>    nsg_id                                        = optional(string)<br/>    nsg_key                                       = optional(string)<br/>    delegations = optional(list(object({<br/>      name = string<br/>      service_delegation = object({<br/>        name    = string<br/>        actions = list(string)<br/>      })<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to all networking resources created by this module. | `map(string)` | `{}` | no |
+| <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | Name of the Virtual Network. | `string` | n/a | yes |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_address_space"></a> [address\_space](#output\_address\_space) | The address space of the Virtual Network. |
+| <a name="output_network_security_group_ids"></a> [network\_security\_group\_ids](#output\_network\_security\_group\_ids) | Map of NSG keys to Network Security Group resource IDs created by this module. |
+| <a name="output_network_security_group_names"></a> [network\_security\_group\_names](#output\_network\_security\_group\_names) | Map of NSG keys to Network Security Group names created by this module. |
+| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The Azure Resource Manager ID of the Virtual Network. |
+| <a name="output_subnet_ids"></a> [subnet\_ids](#output\_subnet\_ids) | Map of subnet keys to subnet resource IDs. |
+| <a name="output_subnet_names"></a> [subnet\_names](#output\_subnet\_names) | Map of subnet keys to subnet names. |
+| <a name="output_subnets"></a> [subnets](#output\_subnets) | Non-sensitive subnet metadata for downstream module composition. |
+| <a name="output_vnet_id"></a> [vnet\_id](#output\_vnet\_id) | The Azure Resource Manager ID of the Virtual Network. |
+| <a name="output_vnet_name"></a> [vnet\_name](#output\_vnet\_name) | The name of the Virtual Network. |
+<!-- END_TF_DOCS -->

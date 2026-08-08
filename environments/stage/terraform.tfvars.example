@@ -52,9 +52,17 @@ api_key_placeholder            = "replace-via-github-actions-secret"
 # Optional: GitHub Actions OIDC service principal object ID for Key Vault secret provisioning
 # deployment_principal_id = "00000000-0000-0000-0000-000000000000"
 
-# --- Container App -------------------------------------------------------------
+# --- Container Apps / CCH runtime ---------------------------------------------
 
-container_image_name               = "api"
+container_image_name               = "cloud-content-hub-api"
 container_image_tag                = "stage"
-container_target_port              = 8080
+worker_image_name                  = "cloud-content-hub-worker"
+worker_image_tag                   = "stage"
+container_target_port              = 8000
 container_ingress_external_enabled = true
+
+cch_environment          = "staging"
+cch_log_level            = "INFO"
+cch_openapi_enabled      = true
+cch_http_allowed_origins = ["https://stage.app.example.com"]
+celery_concurrency       = 4

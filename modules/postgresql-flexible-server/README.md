@@ -223,4 +223,72 @@ module "postgresql_flexible_server" {
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_postgresql_flexible_server.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_administrator_login"></a> [administrator\_login](#input\_administrator\_login) | Administrator login username for the PostgreSQL Flexible Server. | `string` | n/a | yes |
+| <a name="input_administrator_password"></a> [administrator\_password](#input\_administrator\_password) | Administrator password. Supply via tfvars, Key Vault, or CI secrets — never hardcode in source. | `string` | n/a | yes |
+| <a name="input_backup_retention_days"></a> [backup\_retention\_days](#input\_backup\_retention\_days) | Backup retention period in days. | `number` | `7` | no |
+| <a name="input_delegated_subnet_id"></a> [delegated\_subnet\_id](#input\_delegated\_subnet\_id) | Optional subnet ID for VNet-integrated deployment. Requires private\_dns\_zone\_id when set. | `string` | `null` | no |
+| <a name="input_geo_redundant_backup_enabled"></a> [geo\_redundant\_backup\_enabled](#input\_geo\_redundant\_backup\_enabled) | When true, enables geo-redundant backup storage. | `bool` | `false` | no |
+| <a name="input_high_availability_mode"></a> [high\_availability\_mode](#input\_high\_availability\_mode) | High availability mode. Disabled, SameZone, or ZoneRedundant. | `string` | `"Disabled"` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for the PostgreSQL Flexible Server. | `string` | n/a | yes |
+| <a name="input_postgresql_version"></a> [postgresql\_version](#input\_postgresql\_version) | PostgreSQL major version. | `string` | `"16"` | no |
+| <a name="input_private_dns_zone_id"></a> [private\_dns\_zone\_id](#input\_private\_dns\_zone\_id) | Optional private DNS zone ID for VNet-integrated deployment. | `string` | `null` | no |
+| <a name="input_public_network_access_enabled"></a> [public\_network\_access\_enabled](#input\_public\_network\_access\_enabled) | When true, allows public network access to the server. | `bool` | `true` | no |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where the PostgreSQL Flexible Server is created. | `string` | n/a | yes |
+| <a name="input_server_name"></a> [server\_name](#input\_server\_name) | Name of the PostgreSQL Flexible Server. Must be supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+| <a name="input_sku_name"></a> [sku\_name](#input\_sku\_name) | SKU name for the PostgreSQL Flexible Server (e.g. B\_Standard\_B1ms, GP\_Standard\_D2s\_v3). | `string` | `"B_Standard_B1ms"` | no |
+| <a name="input_storage_mb"></a> [storage\_mb](#input\_storage\_mb) | Storage size in megabytes. Minimum 32768 (32 GB). | `number` | `32768` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to the PostgreSQL Flexible Server. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+| <a name="input_zone"></a> [zone](#input\_zone) | Availability zone for the server (1, 2, or 3). Null for no zone preference. | `string` | `null` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_administrator_login"></a> [administrator\_login](#output\_administrator\_login) | The administrator login username. Password is never exposed. |
+| <a name="output_connection_endpoint"></a> [connection\_endpoint](#output\_connection\_endpoint) | PostgreSQL connection endpoint in host:port format. |
+| <a name="output_fqdn"></a> [fqdn](#output\_fqdn) | The fully qualified domain name of the PostgreSQL Flexible Server. |
+| <a name="output_id"></a> [id](#output\_id) | The Azure Resource Manager ID of the PostgreSQL Flexible Server. |
+| <a name="output_name"></a> [name](#output\_name) | The name of the PostgreSQL Flexible Server. |
+| <a name="output_postgresql_version"></a> [postgresql\_version](#output\_postgresql\_version) | The PostgreSQL major version of the server. |
+| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The Azure Resource Manager ID of the PostgreSQL Flexible Server. |
+| <a name="output_server"></a> [server](#output\_server) | Non-sensitive server metadata for downstream module composition. |
+| <a name="output_sku_name"></a> [sku\_name](#output\_sku\_name) | The SKU name of the PostgreSQL Flexible Server. |
 <!-- END_TF_DOCS -->

@@ -240,4 +240,61 @@ Request → Approve → Terraform apply → Monitor expiry → Renew or remove
 - [Policy Initiative Module](../policy-initiative/README.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.13.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.0 |
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_management_group_policy_exemption.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_group_policy_exemption) | resource |
+| [azurerm_resource_group_policy_exemption.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group_policy_exemption) | resource |
+| [azurerm_resource_policy_exemption.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_policy_exemption) | resource |
+| [azurerm_subscription_policy_exemption.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_exemption) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_exemptions"></a> [exemptions](#input\_exemptions) | List of Azure Policy exemptions. Each entry requires a stable key for for\_each identity. | <pre>list(object({<br/>    key                             = string<br/>    name                            = string<br/>    display_name                    = optional(string)<br/>    description                     = optional(string)<br/>    scope                           = string<br/>    policy_assignment_id            = string<br/>    policy_definition_reference_ids = optional(list(string))<br/>    exemption_category              = string<br/>    expires_on                      = optional(string)<br/>    metadata                        = optional(map(string))<br/>  }))</pre> | `[]` | no |
+| <a name="input_require_expiration_dates"></a> [require\_expiration\_dates](#input\_require\_expiration\_dates) | When true, every exemption must specify expires\_on. Recommended for production to avoid permanent exemptions. | `bool` | `false` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_exemption_ids"></a> [exemption\_ids](#output\_exemption\_ids) | Map of exemption keys to Azure Policy Exemption resource IDs. |
+| <a name="output_exemption_names"></a> [exemption\_names](#output\_exemption\_names) | Map of exemption keys to exemption resource names. |
+| <a name="output_exemptions"></a> [exemptions](#output\_exemptions) | Non-sensitive exemption metadata for downstream module composition. |
+| <a name="output_expiration_dates"></a> [expiration\_dates](#output\_expiration\_dates) | Map of exemption keys to normalized expiration dates (null when not set). |
+| <a name="output_policy_assignment_ids"></a> [policy\_assignment\_ids](#output\_policy\_assignment\_ids) | Map of exemption keys to parent policy assignment resource IDs. |
+| <a name="output_scopes"></a> [scopes](#output\_scopes) | Map of exemption keys to exemption scopes. |
 <!-- END_TF_DOCS -->

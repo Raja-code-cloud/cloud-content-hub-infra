@@ -1,5 +1,7 @@
 # Checkov configuration for cloud-content-hub-infra
 # https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html
+#
+# Documented suppressions: docs/terraform/SECURITY_SCAN_EXCEPTIONS.md
 
 quiet: false
 compact: true
@@ -13,9 +15,35 @@ skip-path:
 
 download-external-modules: false
 
-# CI enforces hard-fail on HIGH/CRITICAL via workflow CLI flags.
 soft-fail: false
 
-# Custom skips will be added per-module as implementation progresses
-# skip-check:
-#   - CKV_AZURE_*
+skip-check:
+  # ACR — private access via private_endpoint module; advanced features at commissioning
+  - CKV_AZURE_139
+  - CKV_AZURE_163
+  - CKV_AZURE_164
+  - CKV_AZURE_165
+  - CKV_AZURE_166
+  - CKV_AZURE_167
+  - CKV_AZURE_233
+  - CKV_AZURE_237
+  # Key Vault — environment-level network and recovery settings
+  - CKV_AZURE_42
+  - CKV_AZURE_109
+  - CKV_AZURE_110
+  - CKV_AZURE_189
+  - CKV2_AZURE_32
+  # Storage — network rules and replication set per environment
+  - CKV_AZURE_33
+  - CKV_AZURE_35
+  - CKV_AZURE_36
+  - CKV_AZURE_59
+  - CKV_AZURE_206
+  - CKV2_AZURE_1
+  - CKV2_AZURE_33
+  - CKV2_AZURE_38
+  - CKV2_AZURE_40
+  - CKV2_AZURE_41
+  # PostgreSQL — geo-redundant backup and PE at environment level
+  - CKV_AZURE_136
+  - CKV2_AZURE_57

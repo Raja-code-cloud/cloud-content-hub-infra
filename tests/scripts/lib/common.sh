@@ -35,6 +35,10 @@ log_warn() { echo -e "${C_WARN}[WARN]${C_RESET} $*"; }
 log_error() { echo -e "${C_ERR}[ERROR]${C_RESET} $*" >&2; }
 die() { log_error "$@"; exit 1; }
 
+strip_cr() {
+  printf '%s' "$1" | tr -d '\r'
+}
+
 require_command() {
   command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"
 }
@@ -132,6 +136,18 @@ terraform_init_validate() {
 
 terraform_fmt_check() {
   terraform fmt -recursive -check -diff
+}
+
+# Provider inheritance: modules omit required_version/required_providers by design.
+# See docs/terraform/provider-inheritance.md
+run_tflint_recursive() {
+  local format="${1:-compact}"
+  tflint --init >/dev/null 2>&1 || true
+  tflint \
+    --disable-rule=terraform_required_version \
+    --disable-rule=terraform_required_providers \
+    --recursive \
+    --format "$format"
 }
 
 write_suite_summary() {

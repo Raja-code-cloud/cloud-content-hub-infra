@@ -464,4 +464,81 @@ Terraform requires static `lifecycle` blocks. This module always ignores `secret
 - [Shared Foundation](../../docs/terraform/shared-foundation.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.0 |
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_container_app.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_container_app_environment_id"></a> [container\_app\_environment\_id](#input\_container\_app\_environment\_id) | Resource ID of the existing Container Apps Environment. This module does not create the environment. | `string` | n/a | yes |
+| <a name="input_container_app_name"></a> [container\_app\_name](#input\_container\_app\_name) | Name of the Container App. Must be supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+| <a name="input_containers"></a> [containers](#input\_containers) | Container definitions for the app template. At least one container is required. | <pre>list(object({<br/>    name            = string<br/>    image           = string<br/>    image_tag       = optional(string, "latest")<br/>    cpu             = number<br/>    memory          = string<br/>    command         = optional(list(string))<br/>    startup_command = optional(list(string))<br/>    args            = optional(list(string))<br/>    env = optional(list(object({<br/>      name        = string<br/>      value       = optional(string)<br/>      secret_name = optional(string)<br/>    })), [])<br/>    liveness_probe = optional(object({<br/>      transport               = string<br/>      port                    = number<br/>      path                    = optional(string)<br/>      host                    = optional(string)<br/>      initial_delay           = optional(number)<br/>      interval_seconds        = optional(number)<br/>      timeout                 = optional(number)<br/>      failure_count_threshold = optional(number)<br/>      headers = optional(list(object({<br/>        name  = string<br/>        value = string<br/>      })), [])<br/>    }))<br/>    readiness_probe = optional(object({<br/>      transport               = string<br/>      port                    = number<br/>      path                    = optional(string)<br/>      host                    = optional(string)<br/>      initial_delay           = optional(number)<br/>      interval_seconds        = optional(number)<br/>      timeout                 = optional(number)<br/>      failure_count_threshold = optional(number)<br/>      success_count_threshold = optional(number)<br/>      headers = optional(list(object({<br/>        name  = string<br/>        value = string<br/>      })), [])<br/>    }))<br/>    startup_probe = optional(object({<br/>      transport               = string<br/>      port                    = number<br/>      path                    = optional(string)<br/>      host                    = optional(string)<br/>      initial_delay           = optional(number)<br/>      interval_seconds        = optional(number)<br/>      timeout                 = optional(number)<br/>      failure_count_threshold = optional(number)<br/>      headers = optional(list(object({<br/>        name  = string<br/>        value = string<br/>      })), [])<br/>    }))<br/>    volume_mounts = optional(list(object({<br/>      name     = string<br/>      path     = string<br/>      sub_path = optional(string)<br/>    })), [])<br/>  }))</pre> | n/a | yes |
+| <a name="input_dapr"></a> [dapr](#input\_dapr) | Optional Dapr sidecar configuration. Disabled by default. | <pre>object({<br/>    enabled      = optional(bool, false)<br/>    app_id       = optional(string)<br/>    app_port     = optional(number)<br/>    app_protocol = optional(string, "http")<br/>  })</pre> | <pre>{<br/>  "enabled": false<br/>}</pre> | no |
+| <a name="input_identity"></a> [identity](#input\_identity) | Managed identity configuration. Set to null to deploy without managed identity. | <pre>object({<br/>    type         = string<br/>    identity_ids = optional(list(string), [])<br/>  })</pre> | `null` | no |
+| <a name="input_ingress"></a> [ingress](#input\_ingress) | Ingress configuration. Set to null to deploy an internal worker without HTTP ingress. | <pre>object({<br/>    enabled                    = optional(bool, true)<br/>    external_enabled           = optional(bool, true)<br/>    target_port                = number<br/>    exposed_port               = optional(number)<br/>    transport                  = optional(string, "auto")<br/>    allow_insecure_connections = optional(bool, false)<br/>    client_certificate_mode    = optional(string)<br/>    traffic_weights = optional(list(object({<br/>      latest_revision = optional(bool)<br/>      percentage      = number<br/>      label           = optional(string)<br/>      revision_suffix = optional(string)<br/>    })), [])<br/>    cors = optional(object({<br/>      allowed_origins           = list(string)<br/>      allow_credentials_enabled = optional(bool, false)<br/>      allowed_headers           = optional(list(string))<br/>      allowed_methods           = optional(list(string))<br/>      exposed_headers           = optional(list(string))<br/>      max_age_in_seconds        = optional(number)<br/>    }))<br/>    ip_security_restrictions = optional(list(object({<br/>      name             = string<br/>      action           = string<br/>      ip_address_range = string<br/>      description      = optional(string)<br/>    })), [])<br/>  })</pre> | `null` | no |
+| <a name="input_init_containers"></a> [init\_containers](#input\_init\_containers) | Optional init container definitions executed before application containers start. | <pre>list(object({<br/>    name    = string<br/>    image   = string<br/>    cpu     = optional(number)<br/>    memory  = optional(string)<br/>    command = optional(list(string))<br/>    args    = optional(list(string))<br/>    env = optional(list(object({<br/>      name        = string<br/>      value       = optional(string)<br/>      secret_name = optional(string)<br/>    })), [])<br/>    volume_mounts = optional(list(object({<br/>      name     = string<br/>      path     = string<br/>      sub_path = optional(string)<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+| <a name="input_lifecycle_options"></a> [lifecycle\_options](#input\_lifecycle\_options) | Lifecycle behavior flags. Secret values are always ignored in the resource lifecycle block to support Key Vault references without drift. | <pre>object({<br/>    ignore_secret_values = optional(bool, true)<br/>  })</pre> | <pre>{<br/>  "ignore_secret_values": true<br/>}</pre> | no |
+| <a name="input_max_inactive_revisions"></a> [max\_inactive\_revisions](#input\_max\_inactive\_revisions) | Maximum number of inactive revisions retained for this Container App. | `number` | `null` | no |
+| <a name="input_observability"></a> [observability](#input\_observability) | Optional Application Insights integration via environment variables. Does not create Application Insights. | <pre>object({<br/>    application_insights_connection_string             = optional(string)<br/>    application_insights_connection_string_secret_name = optional(string)<br/>    application_insights_secret_name                   = optional(string)<br/>  })</pre> | `null` | no |
+| <a name="input_registries"></a> [registries](#input\_registries) | Container registry authentication configurations. Supports multiple registries for future multi-registry deployments. | <pre>list(object({<br/>    server               = string<br/>    identity             = optional(string)<br/>    username             = optional(string)<br/>    password_secret_name = optional(string)<br/>  }))</pre> | `[]` | no |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where the Container App is created. | `string` | n/a | yes |
+| <a name="input_revision_mode"></a> [revision\_mode](#input\_revision\_mode) | Revision operational mode. Single allows one active revision; Multiple supports traffic splitting. | `string` | `"Single"` | no |
+| <a name="input_scale"></a> [scale](#input\_scale) | Autoscaling configuration including replica bounds and KEDA scale rules. | <pre>object({<br/>    min_replicas                     = optional(number, 0)<br/>    max_replicas                     = optional(number, 10)<br/>    cooldown_period_in_seconds       = optional(number)<br/>    polling_interval_in_seconds      = optional(number)<br/>    revision_suffix                  = optional(string)<br/>    termination_grace_period_seconds = optional(number)<br/>    http_rules = optional(list(object({<br/>      name                = string<br/>      concurrent_requests = number<br/>      authentication = optional(list(object({<br/>        secret_name       = string<br/>        trigger_parameter = string<br/>      })), [])<br/>    })), [])<br/>    tcp_rules = optional(list(object({<br/>      name                = string<br/>      concurrent_requests = number<br/>      authentication = optional(list(object({<br/>        secret_name       = string<br/>        trigger_parameter = string<br/>      })), [])<br/>    })), [])<br/>    custom_rules = optional(list(object({<br/>      name             = string<br/>      custom_rule_type = string<br/>      metadata         = map(string)<br/>      identity_id      = optional(string)<br/>      authentication = optional(list(object({<br/>        secret_name       = string<br/>        trigger_parameter = string<br/>      })), [])<br/>    })), [])<br/>    azure_queue_rules = optional(list(object({<br/>      name         = string<br/>      queue_name   = string<br/>      queue_length = number<br/>      authentication = list(object({<br/>        secret_name       = string<br/>        trigger_parameter = string<br/>      }))<br/>    })), [])<br/>  })</pre> | <pre>{<br/>  "max_replicas": 10,<br/>  "min_replicas": 0<br/>}</pre> | no |
+| <a name="input_secrets"></a> [secrets](#input\_secrets) | Inline secrets and Key Vault secret references. Secret values are never exposed in outputs. | <pre>list(object({<br/>    name                = string<br/>    value               = optional(string)<br/>    key_vault_secret_id = optional(string)<br/>    identity            = optional(string)<br/>  }))</pre> | `[]` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to the Container App. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+| <a name="input_volumes"></a> [volumes](#input\_volumes) | Template volumes for shared storage across containers. | <pre>list(object({<br/>    name          = string<br/>    storage_type  = optional(string, "EmptyDir")<br/>    storage_name  = optional(string)<br/>    mount_options = optional(string)<br/>  }))</pre> | `[]` | no |
+| <a name="input_workload_profile_name"></a> [workload\_profile\_name](#input\_workload\_profile\_name) | Workload profile name in the Container Apps Environment. Omit to use the default Consumption profile. | `string` | `null` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_container_app"></a> [container\_app](#output\_container\_app) | Non-sensitive Container App metadata for downstream module composition. Never includes secret values. |
+| <a name="output_environment_id"></a> [environment\_id](#output\_environment\_id) | The Container Apps Environment resource ID hosting this app. |
+| <a name="output_fqdn"></a> [fqdn](#output\_fqdn) | The FQDN of the latest revision when ingress is enabled. Null for internal workers without ingress. |
+| <a name="output_id"></a> [id](#output\_id) | The Azure Resource Manager ID of the Container App. |
+| <a name="output_identity_id"></a> [identity\_id](#output\_identity\_id) | The resource ID of the first user-assigned managed identity attached to the Container App. Null when only system-assigned identity is used or no identity is configured. |
+| <a name="output_identity_ids"></a> [identity\_ids](#output\_identity\_ids) | Resource IDs of user-assigned managed identities attached to the Container App. |
+| <a name="output_ingress_url"></a> [ingress\_url](#output\_ingress\_url) | HTTPS URL for the Container App ingress when a FQDN is available. |
+| <a name="output_latest_revision"></a> [latest\_revision](#output\_latest\_revision) | The FQDN of the latest revision of the Container App. |
+| <a name="output_latest_revision_name"></a> [latest\_revision\_name](#output\_latest\_revision\_name) | The name of the latest Container App revision. |
+| <a name="output_location"></a> [location](#output\_location) | The Azure region where the Container App is deployed. |
+| <a name="output_name"></a> [name](#output\_name) | The name of the Container App. |
+| <a name="output_outbound_ip_addresses"></a> [outbound\_ip\_addresses](#output\_outbound\_ip\_addresses) | Public IP addresses used for outbound network access from the Container App. |
+| <a name="output_principal_id"></a> [principal\_id](#output\_principal\_id) | The principal ID of the system-assigned managed identity. Null when system-assigned identity is not enabled. |
+| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The Azure Resource Manager ID of the Container App. |
 <!-- END_TF_DOCS -->

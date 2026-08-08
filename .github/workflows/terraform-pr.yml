@@ -17,7 +17,6 @@ on:
       - ".github/**"
       - ".tflint.hcl"
       - ".checkov.yml"
-      - ".tfsec.yml"
       - ".terraform-docs.yml"
 
 concurrency:

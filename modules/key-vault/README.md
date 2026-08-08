@@ -188,4 +188,67 @@ Operations (secret read/write) are billed per transaction. Premium SKU adds HSM-
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_key_vault.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault) | resource |
+| [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_enable_rbac_authorization"></a> [enable\_rbac\_authorization](#input\_enable\_rbac\_authorization) | When true, uses Azure RBAC for data plane authorization instead of vault access policies. | `bool` | `true` | no |
+| <a name="input_enabled_for_deployment"></a> [enabled\_for\_deployment](#input\_enabled\_for\_deployment) | When true, allows Azure Virtual Machines to retrieve certificates stored as secrets. | `bool` | `false` | no |
+| <a name="input_enabled_for_disk_encryption"></a> [enabled\_for\_disk\_encryption](#input\_enabled\_for\_disk\_encryption) | When true, allows Azure Disk Encryption to retrieve secrets and keys. | `bool` | `false` | no |
+| <a name="input_enabled_for_template_deployment"></a> [enabled\_for\_template\_deployment](#input\_enabled\_for\_template\_deployment) | When true, allows Azure Resource Manager to retrieve secrets during template deployments. | `bool` | `false` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for the Key Vault. | `string` | n/a | yes |
+| <a name="input_public_network_access_enabled"></a> [public\_network\_access\_enabled](#input\_public\_network\_access\_enabled) | When true, allows access to the Key Vault over the public internet. | `bool` | `true` | no |
+| <a name="input_purge_protection_enabled"></a> [purge\_protection\_enabled](#input\_purge\_protection\_enabled) | When true, prevents permanent deletion during the retention period after soft delete. | `bool` | `true` | no |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where the Key Vault is created. | `string` | n/a | yes |
+| <a name="input_sku_name"></a> [sku\_name](#input\_sku\_name) | SKU name for the Key Vault. Standard is recommended for most workloads. | `string` | `"standard"` | no |
+| <a name="input_soft_delete_retention_days"></a> [soft\_delete\_retention\_days](#input\_soft\_delete\_retention\_days) | Number of days to retain soft-deleted vaults and objects (7-90). | `number` | `90` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to the Key Vault. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+| <a name="input_vault_name"></a> [vault\_name](#input\_vault\_name) | Name of the Azure Key Vault. Must be globally unique and supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_id"></a> [id](#output\_id) | The Azure Resource Manager ID of the Key Vault. |
+| <a name="output_location"></a> [location](#output\_location) | The Azure region of the Key Vault. |
+| <a name="output_name"></a> [name](#output\_name) | The name of the Key Vault. |
+| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The Azure Resource Manager ID of the Key Vault. |
+| <a name="output_tenant_id"></a> [tenant\_id](#output\_tenant\_id) | The Azure AD Tenant ID associated with the Key Vault. |
+| <a name="output_vault"></a> [vault](#output\_vault) | Non-sensitive Key Vault metadata for downstream module composition. |
+| <a name="output_vault_uri"></a> [vault\_uri](#output\_vault\_uri) | The URI of the Key Vault for data plane operations. |
 <!-- END_TF_DOCS -->

@@ -349,4 +349,56 @@ Keep previous parameter values in version control or change records to enable fa
 - [Terraform Standards](../../docs/terraform/standards.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_postgresql_flexible_server_configuration.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_configuration) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_allow_restricted_configurations"></a> [allow\_restricted\_configurations](#input\_allow\_restricted\_configurations) | When true, permits managing authentication and transport security configuration parameters. Defaults to false to avoid unintended security changes. | `bool` | `false` | no |
+| <a name="input_configurations"></a> [configurations](#input\_configurations) | List of PostgreSQL server configuration parameters to manage on the flexible server. | <pre>list(object({<br/>    name    = string<br/>    value   = string<br/>    source  = optional(string)<br/>    enabled = optional(bool, true)<br/>  }))</pre> | `[]` | no |
+| <a name="input_server_id"></a> [server\_id](#input\_server\_id) | Resource ID of the existing PostgreSQL Flexible Server. This module does not create the server. | `string` | n/a | yes |
+| <a name="input_server_name"></a> [server\_name](#input\_server\_name) | Name of the existing PostgreSQL Flexible Server. Used for outputs and cross-validation against server\_id. | `string` | n/a | yes |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_applied_values"></a> [applied\_values](#output\_applied\_values) | Map of configuration names to applied PostgreSQL server parameter values. |
+| <a name="output_configuration_ids"></a> [configuration\_ids](#output\_configuration\_ids) | Map of configuration names to Azure Resource Manager IDs. |
+| <a name="output_configuration_names"></a> [configuration\_names](#output\_configuration\_names) | Map of configuration names to PostgreSQL server parameter names. |
+| <a name="output_configurations"></a> [configurations](#output\_configurations) | Non-sensitive configuration metadata for downstream module composition. |
+| <a name="output_server_name"></a> [server\_name](#output\_server\_name) | Name of the PostgreSQL Flexible Server hosting the configuration parameters. |
 <!-- END_TF_DOCS -->

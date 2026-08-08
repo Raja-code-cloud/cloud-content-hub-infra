@@ -204,4 +204,71 @@ LRS + Standard + Hot is the lowest-cost combination for development workloads.
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_storage_account.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_access_tier"></a> [access\_tier](#input\_access\_tier) | Default blob access tier for StorageV2 and BlobStorage accounts. | `string` | `"Hot"` | no |
+| <a name="input_account_kind"></a> [account\_kind](#input\_account\_kind) | Storage account kind. StorageV2 is recommended for general-purpose blob, file, queue, and table storage. | `string` | `"StorageV2"` | no |
+| <a name="input_account_replication_type"></a> [account\_replication\_type](#input\_account\_replication\_type) | Storage replication strategy. LRS is the lowest-cost option for non-production workloads. | `string` | `"LRS"` | no |
+| <a name="input_account_tier"></a> [account\_tier](#input\_account\_tier) | Storage account tier. Standard for general-purpose workloads; Premium for high-performance scenarios. | `string` | `"Standard"` | no |
+| <a name="input_allow_blob_public_access"></a> [allow\_blob\_public\_access](#input\_allow\_blob\_public\_access) | When true, allows nested blob containers to permit anonymous public access. | `bool` | `false` | no |
+| <a name="input_https_traffic_only_enabled"></a> [https\_traffic\_only\_enabled](#input\_https\_traffic\_only\_enabled) | When true, requires secure transfer (HTTPS) for all requests. | `bool` | `true` | no |
+| <a name="input_infrastructure_encryption_enabled"></a> [infrastructure\_encryption\_enabled](#input\_infrastructure\_encryption\_enabled) | When true, enables infrastructure encryption for data at rest (double encryption). | `bool` | `false` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for the Storage Account. | `string` | n/a | yes |
+| <a name="input_min_tls_version"></a> [min\_tls\_version](#input\_min\_tls\_version) | Minimum TLS version for HTTPS requests to the storage account. | `string` | `"TLS1_2"` | no |
+| <a name="input_network_rules"></a> [network\_rules](#input\_network\_rules) | Optional network rules restricting storage account access. Recommended when private endpoints are enabled. | <pre>object({<br/>    default_action             = optional(string, "Deny")<br/>    bypass                     = optional(list(string), ["AzureServices"])<br/>    ip_rules                   = optional(list(string), [])<br/>    virtual_network_subnet_ids = optional(list(string), [])<br/>  })</pre> | `null` | no |
+| <a name="input_public_network_access_enabled"></a> [public\_network\_access\_enabled](#input\_public\_network\_access\_enabled) | When true, allows access to the storage account over the public internet. | `bool` | `true` | no |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where the Storage Account is created. | `string` | n/a | yes |
+| <a name="input_shared_access_key_enabled"></a> [shared\_access\_key\_enabled](#input\_shared\_access\_key\_enabled) | When true, allows authenticated access via shared access keys. | `bool` | `true` | no |
+| <a name="input_storage_account_name"></a> [storage\_account\_name](#input\_storage\_account\_name) | Globally unique name of the Storage Account. Must be supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to the Storage Account. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_id"></a> [id](#output\_id) | The Azure Resource Manager ID of the Storage Account. |
+| <a name="output_name"></a> [name](#output\_name) | The name of the Storage Account. |
+| <a name="output_primary_blob_endpoint"></a> [primary\_blob\_endpoint](#output\_primary\_blob\_endpoint) | The primary blob service endpoint URL. |
+| <a name="output_primary_dfs_endpoint"></a> [primary\_dfs\_endpoint](#output\_primary\_dfs\_endpoint) | The primary Azure Data Lake Storage Gen2 endpoint URL. Empty when hierarchical namespace is not enabled. |
+| <a name="output_primary_file_endpoint"></a> [primary\_file\_endpoint](#output\_primary\_file\_endpoint) | The primary file service endpoint URL. |
+| <a name="output_primary_queue_endpoint"></a> [primary\_queue\_endpoint](#output\_primary\_queue\_endpoint) | The primary queue service endpoint URL. |
+| <a name="output_primary_table_endpoint"></a> [primary\_table\_endpoint](#output\_primary\_table\_endpoint) | The primary table service endpoint URL. |
+| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The Azure Resource Manager ID of the Storage Account. |
+| <a name="output_storage_account"></a> [storage\_account](#output\_storage\_account) | Non-sensitive storage account metadata for downstream module composition. |
 <!-- END_TF_DOCS -->

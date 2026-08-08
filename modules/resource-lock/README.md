@@ -289,3 +289,55 @@ Azure Management Locks are **free**. They have no direct cost impact.
 - [Policy Assignment Module](../policy-assignment/README.md)
 - [Policy Exemption Module](../policy-exemption/README.md)
 - [Role Assignment Module](../role-assignment/README.md)
+
+<!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_locks"></a> [locks](#input\_locks) | List of Azure Management Locks to apply to existing scopes. Each entry requires a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key        = string<br/>    name       = string<br/>    scope      = string<br/>    lock_level = optional(string, "CanNotDelete")<br/>    notes      = optional(string)<br/>  }))</pre> | `[]` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_lock_ids"></a> [lock\_ids](#output\_lock\_ids) | Map of lock keys to Azure Management Lock resource IDs. |
+| <a name="output_lock_levels"></a> [lock\_levels](#output\_lock\_levels) | Map of lock keys to applied management lock levels. |
+| <a name="output_lock_names"></a> [lock\_names](#output\_lock\_names) | Map of lock keys to management lock names. |
+| <a name="output_locks"></a> [locks](#output\_locks) | Non-sensitive management lock metadata for downstream module composition. |
+| <a name="output_scopes"></a> [scopes](#output\_scopes) | Map of lock keys to management lock scopes. |
+<!-- END_TF_DOCS -->

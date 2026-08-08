@@ -354,4 +354,56 @@ Do not store credentials or connection strings in this module. Manage secrets vi
 - [Terraform Standards](../../docs/terraform/standards.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_private_endpoint.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_private_endpoints"></a> [private\_endpoints](#input\_private\_endpoints) | List of Azure Private Endpoints to create. Each entry requires a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                   = string<br/>    private_endpoint_name = string<br/>    resource_group_name   = string<br/>    location              = string<br/>    subnet_id             = string<br/>    target_resource_id    = string<br/>    subresource_names     = list(string)<br/>    private_dns_zone_group = optional(object({<br/>      name                 = string<br/>      private_dns_zone_ids = list(string)<br/>    }))<br/>    network_interface_name          = optional(string)<br/>    custom_network_interface_name   = optional(string)<br/>    private_service_connection_name = optional(string)<br/>    is_manual_connection            = optional(bool, false)<br/>    request_message                 = optional(string)<br/>    tags                            = optional(map(string), {})<br/>    enabled                         = optional(bool, true)<br/>  }))</pre> | `[]` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Default tags applied to all private endpoints. Merged with optional per-endpoint tags. | `map(string)` | `{}` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_network_interface_ids"></a> [network\_interface\_ids](#output\_network\_interface\_ids) | Map of private endpoint keys to private endpoint network interface IDs. |
+| <a name="output_network_interface_names"></a> [network\_interface\_names](#output\_network\_interface\_names) | Map of private endpoint keys to private endpoint network interface names. |
+| <a name="output_private_endpoint_ids"></a> [private\_endpoint\_ids](#output\_private\_endpoint\_ids) | Map of private endpoint keys to Azure Resource Manager IDs. |
+| <a name="output_private_endpoint_names"></a> [private\_endpoint\_names](#output\_private\_endpoint\_names) | Map of private endpoint keys to private endpoint names. |
+| <a name="output_private_endpoints"></a> [private\_endpoints](#output\_private\_endpoints) | Non-sensitive private endpoint metadata for downstream module composition. |
+| <a name="output_private_ip_addresses"></a> [private\_ip\_addresses](#output\_private\_ip\_addresses) | Map of private endpoint keys to allocated private IP addresses. |
+| <a name="output_target_resource_ids"></a> [target\_resource\_ids](#output\_target\_resource\_ids) | Map of private endpoint keys to target Private Link resource IDs. |
 <!-- END_TF_DOCS -->

@@ -225,4 +225,66 @@ Monitor ingestion via Azure Cost Management and Log Analytics usage metrics.
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_application_insights.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_insights) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_application_insights_name"></a> [application\_insights\_name](#input\_application\_insights\_name) | Name of the Application Insights resource. Must be supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+| <a name="input_application_type"></a> [application\_type](#input\_application\_type) | Type of application monitored by Application Insights. | `string` | `"web"` | no |
+| <a name="input_disable_ip_masking"></a> [disable\_ip\_masking](#input\_disable\_ip\_masking) | When true, disables IP masking in telemetry data. | `bool` | `false` | no |
+| <a name="input_force_customer_storage_for_profiler"></a> [force\_customer\_storage\_for\_profiler](#input\_force\_customer\_storage\_for\_profiler) | When true, forces customer-managed storage for profiler data. | `bool` | `false` | no |
+| <a name="input_internet_ingestion_enabled"></a> [internet\_ingestion\_enabled](#input\_internet\_ingestion\_enabled) | When true, allows ingestion of telemetry over the public internet. | `bool` | `true` | no |
+| <a name="input_internet_query_enabled"></a> [internet\_query\_enabled](#input\_internet\_query\_enabled) | When true, allows querying telemetry over the public internet. | `bool` | `true` | no |
+| <a name="input_local_authentication_disabled"></a> [local\_authentication\_disabled](#input\_local\_authentication\_disabled) | When true, disables local authentication in favour of Azure AD authentication. | `bool` | `true` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for Application Insights. Should match the linked Log Analytics Workspace region. | `string` | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where Application Insights is created. | `string` | n/a | yes |
+| <a name="input_sampling_percentage"></a> [sampling\_percentage](#input\_sampling\_percentage) | Percentage of telemetry data sampled (0-100). Lower values reduce ingestion cost. | `number` | `50` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to Application Insights. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+| <a name="input_workspace_id"></a> [workspace\_id](#input\_workspace\_id) | Resource ID of the existing Log Analytics Workspace. This module does not create the workspace. | `string` | n/a | yes |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_application_insights"></a> [application\_insights](#output\_application\_insights) | Non-sensitive Application Insights metadata for downstream module composition. |
+| <a name="output_connection_string"></a> [connection\_string](#output\_connection\_string) | The connection string for Application Insights SDK configuration. Treat as confidential. |
+| <a name="output_id"></a> [id](#output\_id) | The Application Insights application ID (GUID). |
+| <a name="output_instrumentation_key"></a> [instrumentation\_key](#output\_instrumentation\_key) | The instrumentation key for Application Insights SDK configuration. Treat as confidential. |
+| <a name="output_name"></a> [name](#output\_name) | The name of the Application Insights resource. |
+| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The Azure Resource Manager ID of the Application Insights resource. |
+| <a name="output_workspace_id"></a> [workspace\_id](#output\_workspace\_id) | The resource ID of the linked Log Analytics Workspace. |
 <!-- END_TF_DOCS -->

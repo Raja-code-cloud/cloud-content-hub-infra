@@ -288,4 +288,59 @@ module "budget" {
 - [Resource Group Module](../resource-group/README.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.13.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.0 |
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_consumption_budget_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/consumption_budget_resource_group) | resource |
+| [azurerm_consumption_budget_subscription.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/consumption_budget_subscription) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_budgets"></a> [budgets](#input\_budgets) | Azure Cost Management budgets. Each entry requires a stable key for for\_each identity. Scope must be a subscription or resource group resource ID. | <pre>list(object({<br/>    key        = string<br/>    name       = string<br/>    scope      = string<br/>    amount     = number<br/>    time_grain = string<br/>    start_date = string<br/>    end_date   = optional(string)<br/>    tags       = optional(map(string), {})<br/>    filter = optional(object({<br/>      dimensions = optional(list(object({<br/>        name     = string<br/>        operator = optional(string)<br/>        values   = list(string)<br/>      })), [])<br/>      tags = optional(list(object({<br/>        name     = string<br/>        operator = optional(string)<br/>        values   = list(string)<br/>      })), [])<br/>    }))<br/>    notifications = list(object({<br/>      threshold      = number<br/>      operator       = string<br/>      threshold_type = optional(string, "Actual")<br/>      contact_emails = optional(list(string), [])<br/>      contact_groups = optional(list(string), [])<br/>      contact_roles  = optional(list(string), [])<br/>      enabled        = optional(bool, true)<br/>    }))<br/>  }))</pre> | `[]` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_budget_amounts"></a> [budget\_amounts](#output\_budget\_amounts) | Map of budget keys to budget amounts. |
+| <a name="output_budget_ids"></a> [budget\_ids](#output\_budget\_ids) | Map of budget keys to Azure Cost Management budget resource IDs. |
+| <a name="output_budget_names"></a> [budget\_names](#output\_budget\_names) | Map of budget keys to budget names. |
+| <a name="output_budget_scope"></a> [budget\_scope](#output\_budget\_scope) | Map of budget keys to scope resource IDs (alias for budget\_scopes). |
+| <a name="output_budget_scope_types"></a> [budget\_scope\_types](#output\_budget\_scope\_types) | Map of budget keys to scope type (subscription or resource\_group). |
+| <a name="output_budget_scopes"></a> [budget\_scopes](#output\_budget\_scopes) | Map of budget keys to scope resource IDs (subscription or resource group). |
+| <a name="output_budgets"></a> [budgets](#output\_budgets) | Non-sensitive budget metadata for downstream module composition. |
 <!-- END_TF_DOCS -->

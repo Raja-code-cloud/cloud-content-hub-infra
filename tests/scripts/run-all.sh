@@ -95,7 +95,7 @@ case "$SUITE" in
     fi
     ;;
   regression)
-    local args=()
+    args=()
     [[ "$WITH_PLAN" == true ]] && args+=(--with-plan)
     [[ -n "$ENV" ]] && args+=(--env "$ENV")
     run_suite "regression" "${SCRIPT_DIR}/run-regression-tests.sh" "${args[@]}"

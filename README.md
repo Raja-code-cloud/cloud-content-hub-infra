@@ -143,7 +143,9 @@ Full reference: [Terraform Standards](docs/terraform/standards.md)
 | `storage` | Azure Storage Account (platform storage foundation) |
 | `acr` | Azure Container Registry (container image registry) |
 | `container-app-environment` | Azure Container Apps environment |
-| `container-app` | Azure Container Apps |
+| `container-app` | Azure Container Apps (API, worker, beat) |
+| `container-app-job` | Azure Container Apps Jobs (Alembic migrations) |
+| `redis` | Azure Cache for Redis (`CCH_REDIS_URL`) |
 | `postgresql-flexible-server` | Azure Database for PostgreSQL Flexible Server |
 | `postgresql-database` | PostgreSQL database provisioning |
 | `postgresql-configuration` | PostgreSQL server configuration |
@@ -165,7 +167,6 @@ The following modules are **deprecated** and must not be used in new composition
 | `postgres` | `postgresql-flexible-server` |
 | `monitor` | `diagnostic-settings`, `action-group`, `monitor-alerts` |
 | `alerts` | `action-group`, `monitor-alerts` |
-| `redis` | Not implemented |
 
 ## Getting Started
 
@@ -228,7 +229,7 @@ Full documentation: **[CI/CD Architecture](docs/cicd/README.md)**
 | `terraform-validate.yml` | Push, manual | `terraform init` + `validate` for all environments and modules |
 | `terraform-lint.yml` | Push, manual | TFLint static analysis |
 | `terraform-docs.yml` | Push, manual | Verify module documentation is current |
-| `terraform-security.yml` | Push, manual | Checkov, tfsec, Trivy (fail on HIGH/CRITICAL) |
+| `terraform-security.yml` | Push, manual | Checkov, Trivy (fail on HIGH/CRITICAL) |
 | `terraform-plan.yml` | Manual, reusable | Generate and upload plan artifacts |
 | `terraform-apply.yml` | Manual only | Apply with approval gate *(disabled until OIDC)* |
 | `terraform-destroy.yml` | Manual only | Destroy non-prod with confirmation *(disabled until OIDC)* |

@@ -50,6 +50,27 @@ locals {
       include_location  = false
       alphanumeric_only = false
     }
+    worker = {
+      slug              = "worker"
+      max_length        = 32
+      delimiter         = "-"
+      include_location  = false
+      alphanumeric_only = false
+    }
+    beat = {
+      slug              = "beat"
+      max_length        = 32
+      delimiter         = "-"
+      include_location  = false
+      alphanumeric_only = false
+    }
+    migrate = {
+      slug              = "migrate"
+      max_length        = 32
+      delimiter         = "-"
+      include_location  = false
+      alphanumeric_only = false
+    }
     storage = {
       slug              = "storage"
       max_length        = 24

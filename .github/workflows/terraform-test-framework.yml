@@ -14,7 +14,6 @@ on:
       - ".github/**"
       - ".tflint.hcl"
       - ".checkov.yml"
-      - ".tfsec.yml"
       - ".terraform-docs.yml"
   push:
     branches:
@@ -207,15 +206,6 @@ jobs:
           output_format: sarif
           output_file_path: tests/reports/checkov.sarif
           hard_fail_on: HIGH,CRITICAL
-
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working_directory: .
-          soft_fail: false
-          format: sarif
-          sarif_file: tests/reports/tfsec.sarif
-          minimum_severity: HIGH
 
       - name: Run Trivy
         uses: aquasecurity/trivy-action@0.28.0

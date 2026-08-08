@@ -1,8 +1,5 @@
-# tfsec configuration for cloud-content-hub-infra
-# https://aquasecurity.github.io/tfsec/
-
-minimum_severity: HIGH
-
-exclude:
-  # Add justified exclusions with ADR references as needed
-  # - AVDD-AZU-0001
+# DEPRECATED — do not install or run tfsec.
+# See docs/terraform/DEPRECATED_TFSEC.md for migration to Checkov (.checkov.yml).
+#
+# Historical configuration (for reference only):
+# minimum_severity: HIGH

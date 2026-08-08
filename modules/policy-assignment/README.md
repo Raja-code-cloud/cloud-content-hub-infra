@@ -352,4 +352,60 @@ Recommended rollout:
 - Repository `policies/` directory for custom definitions and initiatives
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.13.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.0 |
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_management_group_policy_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_group_policy_assignment) | resource |
+| [azurerm_resource_group_policy_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group_policy_assignment) | resource |
+| [azurerm_resource_policy_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_policy_assignment) | resource |
+| [azurerm_subscription_policy_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_assignment) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_assignments"></a> [assignments](#input\_assignments) | List of Azure Policy assignments. Each entry must include a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                  = string<br/>    name                 = string<br/>    display_name         = optional(string)<br/>    description          = optional(string)<br/>    scope                = string<br/>    policy_definition_id = string<br/>    parameters           = optional(map(any))<br/>    enforcement_mode     = optional(string)<br/>    location             = optional(string)<br/>    identity = optional(object({<br/>      type         = string<br/>      identity_ids = optional(list(string))<br/>    }))<br/>    non_compliance_messages = optional(list(object({<br/>      content                        = string<br/>      policy_definition_reference_id = optional(string)<br/>    })), [])<br/>  }))</pre> | `[]` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_assignment_ids"></a> [assignment\_ids](#output\_assignment\_ids) | Map of assignment keys to Azure Policy Assignment resource IDs. |
+| <a name="output_assignment_names"></a> [assignment\_names](#output\_assignment\_names) | Map of assignment keys to Azure Policy Assignment resource names. |
+| <a name="output_assignments"></a> [assignments](#output\_assignments) | Non-sensitive policy assignment metadata for downstream module composition. |
+| <a name="output_identity_principal_ids"></a> [identity\_principal\_ids](#output\_identity\_principal\_ids) | Map of assignment keys to managed identity principal IDs when an identity is configured. |
+| <a name="output_policy_definition_ids"></a> [policy\_definition\_ids](#output\_policy\_definition\_ids) | Map of assignment keys to assigned policy or initiative definition IDs. |
+| <a name="output_scopes"></a> [scopes](#output\_scopes) | Map of assignment keys to assignment scopes. |
 <!-- END_TF_DOCS -->

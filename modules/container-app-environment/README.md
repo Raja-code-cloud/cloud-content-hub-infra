@@ -248,4 +248,65 @@ Target monthly cost for default configuration (Consumption-only, no VNet, no zon
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_container_app_environment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_environment) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_environment_name"></a> [environment\_name](#input\_environment\_name) | Name of the Container Apps Environment. Must be supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+| <a name="input_infrastructure_subnet_id"></a> [infrastructure\_subnet\_id](#input\_infrastructure\_subnet\_id) | Optional resource ID of the delegated subnet for VNet-integrated Container Apps Environment infrastructure. | `string` | `null` | no |
+| <a name="input_internal_load_balancer_enabled"></a> [internal\_load\_balancer\_enabled](#input\_internal\_load\_balancer\_enabled) | When true, uses an internal load balancer for ingress. Requires infrastructure\_subnet\_id. | `bool` | `false` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for the Container Apps Environment. Should match the linked Log Analytics Workspace region. | `string` | n/a | yes |
+| <a name="input_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#input\_log\_analytics\_workspace\_id) | Resource ID of the existing Log Analytics Workspace. This module does not create the workspace. | `string` | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where the Container Apps Environment is created. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to the Container Apps Environment. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+| <a name="input_workload_profile_enabled"></a> [workload\_profile\_enabled](#input\_workload\_profile\_enabled) | When true, configures workload profiles on the environment. Required to add dedicated profiles later without recreating the environment. | `bool` | `true` | no |
+| <a name="input_workload_profiles"></a> [workload\_profiles](#input\_workload\_profiles) | Workload profiles for the Container Apps Environment. Defaults to Consumption-only for scale-to-zero. | <pre>list(object({<br/>    name                  = string<br/>    workload_profile_type = string<br/>    minimum_count         = optional(number)<br/>    maximum_count         = optional(number)<br/>  }))</pre> | <pre>[<br/>  {<br/>    "name": "Consumption",<br/>    "workload_profile_type": "Consumption"<br/>  }<br/>]</pre> | no |
+| <a name="input_zone_redundancy_enabled"></a> [zone\_redundancy\_enabled](#input\_zone\_redundancy\_enabled) | When true, enables zone redundancy for the Container Apps Environment infrastructure. | `bool` | `false` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_container_app_environment"></a> [container\_app\_environment](#output\_container\_app\_environment) | Non-sensitive Container Apps Environment metadata for downstream module composition. |
+| <a name="output_default_domain"></a> [default\_domain](#output\_default\_domain) | The default domain suffix for container apps deployed in this environment. |
+| <a name="output_id"></a> [id](#output\_id) | The Azure Resource Manager ID of the Container Apps Environment. |
+| <a name="output_location"></a> [location](#output\_location) | The Azure region of the Container Apps Environment. |
+| <a name="output_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#output\_log\_analytics\_workspace\_id) | The resource ID of the linked Log Analytics Workspace. |
+| <a name="output_name"></a> [name](#output\_name) | The name of the Container Apps Environment. |
+| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The Azure Resource Manager ID of the Container Apps Environment. |
+| <a name="output_static_ip"></a> [static\_ip](#output\_static\_ip) | The static IP address of the Container Apps Environment when VNet integration is configured. Null for consumption-only environments without infrastructure subnet. |
 <!-- END_TF_DOCS -->

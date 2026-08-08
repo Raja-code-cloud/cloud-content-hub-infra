@@ -145,4 +145,58 @@ Costs may arise indirectly from resources the identity accesses (Storage, Key Va
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_user_assigned_identity.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_identity_name"></a> [identity\_name](#input\_identity\_name) | Name of the User Assigned Managed Identity. Must be supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for the User Assigned Managed Identity. | `string` | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where the User Assigned Managed Identity is created. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to the managed identity. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_client_id"></a> [client\_id](#output\_client\_id) | The Client ID of the User Assigned Managed Identity. |
+| <a name="output_id"></a> [id](#output\_id) | The Azure Resource Manager ID of the User Assigned Managed Identity. |
+| <a name="output_identity"></a> [identity](#output\_identity) | Non-sensitive identity metadata for downstream module composition. |
+| <a name="output_name"></a> [name](#output\_name) | The name of the User Assigned Managed Identity. |
+| <a name="output_principal_id"></a> [principal\_id](#output\_principal\_id) | The Object ID (Principal ID) of the User Assigned Managed Identity for RBAC assignments. |
+| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The Azure Resource Manager ID of the User Assigned Managed Identity. |
+| <a name="output_tenant_id"></a> [tenant\_id](#output\_tenant\_id) | The Azure AD Tenant ID associated with the User Assigned Managed Identity. |
 <!-- END_TF_DOCS -->

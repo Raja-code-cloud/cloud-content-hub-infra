@@ -213,6 +213,20 @@ module "postgresql_configuration" {
   depends_on = [module.postgresql_flexible_server]
 }
 
+module "redis" {
+  source = "../../modules/redis"
+
+  redis_cache_name    = module.common.resource_names["redis"]
+  resource_group_name = module.resource_group.name
+  location            = module.common.location
+  tags                = module.common.tags
+
+  sku_name                      = local.sizing.redis_sku_name
+  family                        = local.sizing.redis_family
+  capacity                      = local.sizing.redis_capacity
+  public_network_access_enabled = !local.private_endpoints_enabled
+}
+
 # --- Compute Platform ----------------------------------------------------------
 
 module "container_app_environment" {
@@ -244,6 +258,7 @@ module "private_endpoint" {
     module.storage,
     module.acr,
     module.postgresql_flexible_server,
+    module.redis,
   ]
 }
 
@@ -274,6 +289,8 @@ module "key_vault_secrets" {
     module.key_vault,
     module.role_assignment,
     module.application_insights,
+    module.postgresql_flexible_server,
+    module.redis,
   ]
 }
 
@@ -358,19 +375,13 @@ module "container_app" {
   secrets = local.container_app_key_vault_secret_refs
 
   containers = [{
-    name   = "api"
-    image  = local.container_image
-    cpu    = local.sizing.container_cpu
-    memory = local.sizing.container_memory
-    env = [{
-      name  = "ASPNETCORE_ENVIRONMENT"
-      value = local.container_app_environment.aspnetcore_environment
-    }]
-    readiness_probe = {
-      transport = "HTTP"
-      port      = var.container_target_port
-      path      = "/health"
-    }
+    name            = "api"
+    image           = local.api_container_image
+    cpu             = local.sizing.container_cpu
+    memory          = local.sizing.container_memory
+    env             = local.api_env
+    liveness_probe  = local.api_probes.liveness
+    readiness_probe = local.api_probes.readiness
   }]
 
   scale = {
@@ -397,6 +408,162 @@ module "container_app" {
     module.container_app_environment,
     module.role_assignment,
     module.key_vault_secrets,
+    module.acr,
+    module.managed_identity,
+  ]
+}
+
+module "container_app_worker" {
+  source = "../../modules/container-app"
+
+  container_app_name           = module.common.resource_names["worker"]
+  resource_group_name          = module.resource_group.name
+  container_app_environment_id = module.container_app_environment.id
+  tags                         = module.common.tags
+
+  identity = {
+    type         = "UserAssigned"
+    identity_ids = [module.managed_identity.resource_id]
+  }
+
+  registries = [{
+    server   = module.acr.login_server
+    identity = module.managed_identity.resource_id
+  }]
+
+  secrets = [
+    {
+      name                = "database-url"
+      key_vault_secret_id = module.key_vault_secrets.secret_versionless_ids["cch-database-url"]
+      identity            = module.managed_identity.resource_id
+    },
+    {
+      name                = "redis-url"
+      key_vault_secret_id = module.key_vault_secrets.secret_versionless_ids["cch-redis-url"]
+      identity            = module.managed_identity.resource_id
+    },
+  ]
+
+  containers = [{
+    name   = "worker"
+    image  = local.worker_container_image
+    cpu    = local.sizing.worker_cpu
+    memory = local.sizing.worker_memory
+    env    = local.worker_env
+  }]
+
+  scale = {
+    min_replicas = local.sizing.worker_min_replicas
+    max_replicas = local.sizing.worker_max_replicas
+  }
+
+  ingress = null
+
+  depends_on = [
+    module.container_app_environment,
+    module.role_assignment,
+    module.key_vault_secrets,
+    module.acr,
+    module.managed_identity,
+  ]
+}
+
+module "container_app_beat" {
+  source = "../../modules/container-app"
+
+  container_app_name           = module.common.resource_names["beat"]
+  resource_group_name          = module.resource_group.name
+  container_app_environment_id = module.container_app_environment.id
+  tags                         = module.common.tags
+
+  identity = {
+    type         = "UserAssigned"
+    identity_ids = [module.managed_identity.resource_id]
+  }
+
+  registries = [{
+    server   = module.acr.login_server
+    identity = module.managed_identity.resource_id
+  }]
+
+  secrets = [
+    {
+      name                = "redis-url"
+      key_vault_secret_id = module.key_vault_secrets.secret_versionless_ids["cch-redis-url"]
+      identity            = module.managed_identity.resource_id
+    },
+  ]
+
+  containers = [{
+    name    = "beat"
+    image   = local.worker_container_image
+    cpu     = local.sizing.beat_cpu
+    memory  = local.sizing.beat_memory
+    command = ["celery"]
+    args = [
+      "--app",
+      "cloud_content_hub.workers.runtime:celery_app",
+      "beat",
+      "--loglevel",
+      var.cch_log_level,
+      "--schedule",
+      "/tmp/celerybeat-schedule",
+    ]
+    env = local.beat_env
+  }]
+
+  scale = {
+    min_replicas = 1
+    max_replicas = 1
+  }
+
+  ingress = null
+
+  depends_on = [
+    module.container_app_environment,
+    module.role_assignment,
+    module.key_vault_secrets,
+    module.acr,
+    module.managed_identity,
+  ]
+}
+
+module "container_app_job_migrate" {
+  source = "../../modules/container-app-job"
+
+  job_name                     = module.common.resource_names["migrate"]
+  resource_group_name          = module.resource_group.name
+  location                     = module.common.location
+  container_app_environment_id = module.container_app_environment.id
+  tags                         = module.common.tags
+
+  identity = {
+    type         = "UserAssigned"
+    identity_ids = [module.managed_identity.resource_id]
+  }
+
+  registries = [{
+    server   = module.acr.login_server
+    identity = module.managed_identity.resource_id
+  }]
+
+  secrets = local.migration_job_key_vault_secret_refs
+
+  containers = [{
+    name    = "migrate"
+    image   = local.api_container_image
+    cpu     = 0.5
+    memory  = "1.0Gi"
+    command = ["alembic"]
+    args    = ["upgrade", "head"]
+    env     = local.migrate_env
+  }]
+
+  depends_on = [
+    module.container_app_environment,
+    module.role_assignment,
+    module.key_vault_secrets,
+    module.postgresql_database,
     module.acr,
     module.managed_identity,
   ]

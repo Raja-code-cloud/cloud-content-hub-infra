@@ -188,4 +188,64 @@ Storage and network egress charges apply based on image size and pull frequency.
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_container_registry.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_registry) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_admin_enabled"></a> [admin\_enabled](#input\_admin\_enabled) | When true, enables the admin user account. Not recommended for production — use managed identity instead. | `bool` | `false` | no |
+| <a name="input_anonymous_pull_enabled"></a> [anonymous\_pull\_enabled](#input\_anonymous\_pull\_enabled) | When true, allows anonymous (unauthenticated) pull access. Requires Standard or Premium SKU. | `bool` | `false` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for the Container Registry. | `string` | n/a | yes |
+| <a name="input_public_network_access_enabled"></a> [public\_network\_access\_enabled](#input\_public\_network\_access\_enabled) | When true, allows access to the registry over the public internet. | `bool` | `true` | no |
+| <a name="input_registry_name"></a> [registry\_name](#input\_registry\_name) | Globally unique name of the Azure Container Registry. Must be supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where the registry is created. | `string` | n/a | yes |
+| <a name="input_sku"></a> [sku](#input\_sku) | SKU tier for the Container Registry. Basic is suitable for low-cost dev workloads. | `string` | `"Basic"` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to the registry. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+| <a name="input_zone_redundancy_enabled"></a> [zone\_redundancy\_enabled](#input\_zone\_redundancy\_enabled) | When true, enables zone redundancy. Requires Premium SKU. | `bool` | `false` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_admin_password"></a> [admin\_password](#output\_admin\_password) | The admin password when admin\_enabled is true. Null when admin user is disabled. Store in Key Vault — never commit. |
+| <a name="output_admin_username"></a> [admin\_username](#output\_admin\_username) | The admin username when admin\_enabled is true. Null when admin user is disabled. |
+| <a name="output_id"></a> [id](#output\_id) | The Azure Resource Manager ID of the Container Registry. |
+| <a name="output_login_server"></a> [login\_server](#output\_login\_server) | The login server URL for the Container Registry (e.g. myregistry.azurecr.io). |
+| <a name="output_name"></a> [name](#output\_name) | The name of the Container Registry. |
+| <a name="output_registry"></a> [registry](#output\_registry) | Non-sensitive registry metadata for downstream module composition. |
+| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | The Azure Resource Manager ID of the Container Registry. |
+| <a name="output_sku"></a> [sku](#output\_sku) | The SKU tier of the Container Registry. |
 <!-- END_TF_DOCS -->

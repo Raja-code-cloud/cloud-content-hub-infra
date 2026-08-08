@@ -306,3 +306,59 @@ Private DNS zones incur a small per-zone monthly charge plus query volume costs.
 - [Networking Module](../networking/README.md)
 - [Private Endpoint Module](../private-endpoint/README.md)
 - [PostgreSQL Flexible Server Module](../postgresql-flexible-server/README.md)
+
+<!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_private_dns_zone.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_private_dns_zones"></a> [private\_dns\_zones](#input\_private\_dns\_zones) | List of Azure Private DNS zones to create. Zone name is used as the stable for\_each identifier. | <pre>list(object({<br/>    name                 = string<br/>    registration_enabled = optional(bool, false)<br/>  }))</pre> | `[]` | no |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Resource group where private DNS zones and virtual network links are created. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to all private DNS zones and virtual network links created by this module. | `map(string)` | `{}` | no |
+| <a name="input_virtual_network_links"></a> [virtual\_network\_links](#input\_virtual\_network\_links) | List of virtual network links to associate existing VNets with private DNS zones. Each entry requires a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                  = string<br/>    zone_name            = string<br/>    link_name            = string<br/>    vnet_id              = string<br/>    registration_enabled = optional(bool, false)<br/>  }))</pre> | `[]` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_private_dns_zones"></a> [private\_dns\_zones](#output\_private\_dns\_zones) | Non-sensitive private DNS zone metadata for downstream module composition. |
+| <a name="output_virtual_network_link_ids"></a> [virtual\_network\_link\_ids](#output\_virtual\_network\_link\_ids) | Map of virtual network link keys to Azure Private DNS virtual network link resource IDs. |
+| <a name="output_virtual_network_links"></a> [virtual\_network\_links](#output\_virtual\_network\_links) | Non-sensitive virtual network link metadata for downstream module composition. |
+| <a name="output_zone_ids"></a> [zone\_ids](#output\_zone\_ids) | Map of private DNS zone names to Azure Private DNS zone resource IDs. |
+| <a name="output_zone_names"></a> [zone\_names](#output\_zone\_names) | Map of private DNS zone names to zone FQDNs. |
+<!-- END_TF_DOCS -->

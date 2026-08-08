@@ -37,11 +37,22 @@ jobs:
           tflint-version: ${{ env.TFLINT_VERSION }}
 
       - name: Run TFLint
-        run: tflint --recursive --format compact
+        run: |
+          tflint --init
+          tflint \
+            --disable-rule=terraform_required_version \
+            --disable-rule=terraform_required_providers \
+            --recursive \
+            --format compact
 
       - name: Upload lint log
         if: always()
-        run: tflint --recursive --format json > tflint-report.json || true
+        run: |
+          tflint \
+            --disable-rule=terraform_required_version \
+            --disable-rule=terraform_required_providers \
+            --recursive \
+            --format json > tflint-report.json || true
 
       - name: Upload lint report
         if: always()

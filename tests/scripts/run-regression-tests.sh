@@ -11,9 +11,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib/common.sh"
 
 WITH_PLAN=false
-ENV="${1:-}"
+ENV=""
 
-shift || true
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --with-plan) WITH_PLAN=true ;;

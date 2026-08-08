@@ -24,6 +24,8 @@ check_module_structure() {
   while IFS= read -r module; do
     [[ -n "$module" ]] || continue
     while IFS= read -r file; do
+      file="$(strip_cr "$file")"
+      [[ -n "$file" ]] || continue
       [[ -f "${MODULES_DIR}/${module}/${file}" ]] || {
         log_error "Missing ${file} in modules/${module}"
         missing=1
@@ -44,6 +46,8 @@ check_environment_structure() {
   while IFS= read -r env; do
     [[ -n "$env" ]] || continue
     while IFS= read -r file; do
+      file="$(strip_cr "$file")"
+      [[ -n "$file" ]] || continue
       [[ -f "${ENVIRONMENTS_DIR}/${env}/${file}" ]] || {
         log_error "Missing ${file} in environments/${env}"
         missing=1
@@ -57,6 +61,7 @@ check_forbidden_committed_files() {
   local pattern
   local hits=0
   while IFS= read -r pattern; do
+    pattern="$(strip_cr "$pattern")"
     [[ -n "$pattern" ]] || continue
     if git ls-files "$pattern" 2>/dev/null | grep -v '\.example$' | grep -q .; then
       log_error "Forbidden committed file pattern matched: ${pattern}"

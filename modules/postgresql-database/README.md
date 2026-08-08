@@ -284,4 +284,57 @@ After server point-in-time restore, run `terraform plan` and import or reconcile
 - [Terraform Standards](../../docs/terraform/standards.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_postgresql_flexible_server_database.protected](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_database) | resource |
+| [azurerm_postgresql_flexible_server_database.unprotected](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_database) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_databases"></a> [databases](#input\_databases) | List of logical PostgreSQL databases to create on the flexible server. | <pre>list(object({<br/>    name            = string<br/>    charset         = optional(string, "UTF8")<br/>    collation       = optional(string, "en_US.utf8")<br/>    prevent_destroy = optional(bool, true)<br/>  }))</pre> | `[]` | no |
+| <a name="input_server_id"></a> [server\_id](#input\_server\_id) | Resource ID of the existing PostgreSQL Flexible Server. This module does not create the server. | `string` | n/a | yes |
+| <a name="input_server_name"></a> [server\_name](#input\_server\_name) | Name of the existing PostgreSQL Flexible Server. Used for outputs and cross-validation against server\_id. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags for downstream composition and operational metadata. PostgreSQL Flexible Server databases do not support Azure resource tags; values are exposed in outputs only. | `map(string)` | `{}` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_database_ids"></a> [database\_ids](#output\_database\_ids) | Map of database names to Azure Resource Manager IDs. |
+| <a name="output_database_names"></a> [database\_names](#output\_database\_names) | Map of database names to PostgreSQL database names. |
+| <a name="output_databases"></a> [databases](#output\_databases) | Non-sensitive database metadata for downstream module composition. |
+| <a name="output_fully_qualified_database_identifiers"></a> [fully\_qualified\_database\_identifiers](#output\_fully\_qualified\_database\_identifiers) | Map of database names to fully qualified Azure Resource Manager identifiers. |
+| <a name="output_server_name"></a> [server\_name](#output\_server\_name) | Name of the PostgreSQL Flexible Server hosting the databases. |
 <!-- END_TF_DOCS -->

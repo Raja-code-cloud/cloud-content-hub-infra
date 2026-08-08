@@ -30,8 +30,12 @@ locals {
     key_vault      = { resource_type = "key_vault" }
     storage        = { resource_type = "storage" }
     postgres       = { resource_type = "postgres" }
+    redis          = { resource_type = "redis" }
     cae            = { resource_type = "cae" }
     api            = { resource_type = "api" }
+    worker         = { resource_type = "worker" }
+    beat           = { resource_type = "beat" }
+    migrate        = { resource_type = "migrate" }
     vnet           = { resource_type = "vnet" }
     subnet_pe      = { resource_type = "subnet", instance = "pe" }
     subnet_pg      = { resource_type = "subnet", instance = "pg" }
@@ -41,6 +45,7 @@ locals {
     pe_storage     = { resource_type = "api", instance = "pe-st" }
     pe_acr         = { resource_type = "api", instance = "pe-acr" }
     pe_postgres    = { resource_type = "api", instance = "pe-pg" }
+    pe_redis       = { resource_type = "api", instance = "pe-redis" }
   }
 
   stage_additional_tags = merge(var.additional_tags, {
@@ -65,6 +70,15 @@ locals {
     container_min_replicas         = 1
     container_max_replicas         = 5
     container_scale_concurrency    = 50
+    worker_cpu                     = 1.0
+    worker_memory                  = "2.0Gi"
+    worker_min_replicas            = 1
+    worker_max_replicas            = 5
+    beat_cpu                       = 0.5
+    beat_memory                    = "1.0Gi"
+    redis_sku_name                 = local.private_endpoints_enabled ? "Premium" : "Standard"
+    redis_family                   = local.private_endpoints_enabled ? "P" : "C"
+    redis_capacity                 = local.private_endpoints_enabled ? 1 : 1
   }
 
   # --- Networking (used when enable_private_networking = true) -------------------
@@ -111,6 +125,7 @@ locals {
     "privatelink.blob.core.windows.net",
     "privatelink.postgres.database.azure.com",
     "privatelink.azurecr.io",
+    "privatelink.redis.cache.windows.net",
   ]
 
   # --- PostgreSQL --------------------------------------------------------------
@@ -136,9 +151,11 @@ locals {
     },
   ]
 
+  postgresql_database_name = "cloud_content_hub"
+
   postgresql_databases = [
     {
-      name            = "cloud_content_hub"
+      name            = local.postgresql_database_name
       prevent_destroy = true
     },
   ]
@@ -319,13 +336,22 @@ locals {
 
   role_assignments = concat(local.workload_role_assignments, local.deployer_role_assignments)
 
-  # --- Container App -----------------------------------------------------------
+  # --- Container Apps / CCH runtime --------------------------------------------
 
-  container_image = "${module.acr.login_server}/${var.container_image_name}:${var.container_image_tag}"
+  api_container_image    = "${module.acr.login_server}/${var.container_image_name}:${var.container_image_tag}"
+  worker_container_image = "${module.acr.login_server}/${var.worker_image_name}:${var.worker_image_tag}"
+  container_image        = local.api_container_image
 
-  container_app_environment = {
-    aspnetcore_environment = "Staging"
-  }
+  cch_environment     = var.cch_environment
+  storage_account_url = trimsuffix(module.storage.primary_blob_endpoint, "/")
+  database_url = format(
+    "postgresql+asyncpg://%s:%s@%s:5432/%s",
+    var.postgresql_administrator_login,
+    urlencode(var.postgresql_admin_password),
+    module.postgresql_flexible_server.fqdn,
+    local.postgresql_database_name,
+  )
+  migration_database_url = local.database_url
 
   key_vault_secrets = [
     {
@@ -347,7 +373,112 @@ locals {
         purpose = "application"
       }
     },
+    {
+      key          = "cch-database-url"
+      name         = "CCH-DATABASE-URL"
+      value        = local.database_url
+      content_type = "connection-string"
+      tags = {
+        purpose = "application"
+        setting = "CCH_DATABASE_URL"
+      }
+    },
+    {
+      key          = "cch-redis-url"
+      name         = "CCH-REDIS-URL"
+      value        = module.redis.redis_url
+      content_type = "connection-string"
+      tags = {
+        purpose = "application"
+        setting = "CCH_REDIS_URL"
+      }
+    },
+    {
+      key          = "cch-migration-database-url"
+      name         = "CCH-MIGRATION-DATABASE-URL"
+      value        = local.migration_database_url
+      content_type = "connection-string"
+      tags = {
+        purpose = "migration"
+        setting = "CCH_DATABASE_URL"
+      }
+    },
   ]
+
+  container_app_key_vault_secret_refs = [
+    {
+      name                = "database-url"
+      key_vault_secret_id = module.key_vault_secrets.secret_versionless_ids["cch-database-url"]
+      identity            = module.managed_identity.resource_id
+    },
+    {
+      name                = "redis-url"
+      key_vault_secret_id = module.key_vault_secrets.secret_versionless_ids["cch-redis-url"]
+      identity            = module.managed_identity.resource_id
+    },
+  ]
+
+  migration_job_key_vault_secret_refs = [
+    {
+      name                = "migration-database-url"
+      key_vault_secret_id = module.key_vault_secrets.secret_versionless_ids["cch-migration-database-url"]
+      identity            = module.managed_identity.resource_id
+    },
+  ]
+
+  cch_common_env = [
+    { name = "CCH_ENVIRONMENT", value = local.cch_environment },
+    { name = "CCH_SERVICE_VERSION", value = var.container_image_tag },
+    { name = "CCH_LOG_LEVEL", value = var.cch_log_level },
+  ]
+
+  api_env = concat(local.cch_common_env, [
+    { name = "CCH_OPENAPI_ENABLED", value = tostring(var.cch_openapi_enabled) },
+    { name = "CCH_DATABASE_URL", secret_name = "database-url" },
+    { name = "CCH_REDIS_URL", secret_name = "redis-url" },
+    { name = "CCH_HTTP_ALLOWED_ORIGINS", value = jsonencode(var.cch_http_allowed_origins) },
+    { name = "CCH_AZURE_STORAGE_ACCOUNT_URL", value = local.storage_account_url },
+    { name = "CCH_AZURE_STORAGE_CREDENTIAL_MODE", value = "managed_identity" },
+    { name = "CCH_AZURE_STORAGE_MANAGED_IDENTITY_CLIENT_ID", value = module.managed_identity.client_id },
+    { name = "PORT", value = tostring(var.container_target_port) },
+  ])
+
+  worker_env = concat(local.cch_common_env, [
+    { name = "CCH_DATABASE_URL", secret_name = "database-url" },
+    { name = "CCH_REDIS_URL", secret_name = "redis-url" },
+    { name = "CCH_AZURE_STORAGE_ACCOUNT_URL", value = local.storage_account_url },
+    { name = "CCH_AZURE_STORAGE_CREDENTIAL_MODE", value = "managed_identity" },
+    { name = "CCH_AZURE_STORAGE_MANAGED_IDENTITY_CLIENT_ID", value = module.managed_identity.client_id },
+    { name = "CELERY_CONCURRENCY", value = tostring(var.celery_concurrency) },
+  ])
+
+  beat_env = concat(local.cch_common_env, [
+    { name = "CCH_REDIS_URL", secret_name = "redis-url" },
+  ])
+
+  migrate_env = [
+    { name = "CCH_ENVIRONMENT", value = local.cch_environment },
+    { name = "CCH_DATABASE_URL", secret_name = "migration-database-url" },
+  ]
+
+  api_probes = {
+    liveness = {
+      transport               = "HTTP"
+      port                    = var.container_target_port
+      path                    = "/health/live"
+      initial_delay           = 10
+      interval_seconds        = 30
+      failure_count_threshold = 3
+    }
+    readiness = {
+      transport               = "HTTP"
+      port                    = var.container_target_port
+      path                    = "/health/ready"
+      initial_delay           = 15
+      interval_seconds        = 15
+      failure_count_threshold = 5
+    }
+  }
 
   # --- Private endpoints (built when private connectivity is enabled) ----------
 
@@ -409,6 +540,21 @@ locals {
         name = "postgres-dns"
         private_dns_zone_ids = [
           module.private_dns[0].zone_ids["privatelink.postgres.database.azure.com"],
+        ]
+      }
+    },
+    {
+      key                   = "redis"
+      private_endpoint_name = module.common.resource_names["pe_redis"]
+      resource_group_name   = module.resource_group.name
+      location              = module.common.location
+      subnet_id             = module.networking[0].subnet_ids["private-endpoints"]
+      target_resource_id    = module.redis.resource_id
+      subresource_names     = ["redisCache"]
+      private_dns_zone_group = {
+        name = "redis-dns"
+        private_dns_zone_ids = [
+          module.private_dns[0].zone_ids["privatelink.redis.cache.windows.net"],
         ]
       }
     },

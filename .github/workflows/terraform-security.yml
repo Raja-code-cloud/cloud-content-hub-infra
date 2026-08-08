@@ -11,7 +11,6 @@ on:
       - "**/*.tf"
       - "**/*.tfvars"
       - ".checkov.yml"
-      - ".tfsec.yml"
       - ".github/workflows/terraform-security.yml"
   workflow_dispatch:
   workflow_call:
@@ -58,40 +57,6 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-  tfsec:
-    name: tfsec
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working_directory: .
-          soft_fail: false
-          format: sarif
-          sarif_file: tfsec.sarif
-          minimum_severity: HIGH
-
-      - name: Upload tfsec SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: tfsec.sarif
-          category: tfsec
-        continue-on-error: true
-
-      - name: Upload tfsec report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfsec-report
-          path: tfsec.sarif
-          retention-days: 30
-          if-no-files-found: ignore
-
   trivy:
     name: Trivy IaC
     runs-on: ubuntu-latest
@@ -133,7 +98,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - checkov
-      - tfsec
       - trivy
     if: always()
 
@@ -141,7 +105,6 @@ jobs:
       - name: Evaluate security scan results
         run: |
           echo "Checkov:  ${{ needs.checkov.result }}"
-          echo "tfsec:    ${{ needs.tfsec.result }}"
           echo "Trivy:    ${{ needs.trivy.result }}"
 
           {
@@ -150,12 +113,10 @@ jobs:
             echo "| Scanner | Result |"
             echo "|---------|--------|"
             echo "| Checkov | ${{ needs.checkov.result }} |"
-            echo "| tfsec   | ${{ needs.tfsec.result }} |"
             echo "| Trivy   | ${{ needs.trivy.result }} |"
           } > security-summary.md
 
           if [[ "${{ needs.checkov.result }}" == "failure" ]] || \
-             [[ "${{ needs.tfsec.result }}" == "failure" ]] || \
              [[ "${{ needs.trivy.result }}" == "failure" ]]; then
             echo "::error::One or more security scans reported HIGH or CRITICAL findings."
             exit 1

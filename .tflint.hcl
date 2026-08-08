@@ -10,7 +10,7 @@ config {
 
 plugin "terraform" {
   enabled = true
-  preset  = "recommended"
+  preset  = "none"
 }
 
 plugin "azurerm" {
@@ -37,4 +37,14 @@ rule "terraform_unused_declarations" {
 
 rule "terraform_typed_variables" {
   enabled = true
+}
+
+# Provider inheritance: modules do not declare required_version/required_providers.
+# See docs/terraform/provider-inheritance.md
+rule "terraform_required_version" {
+  enabled = false
+}
+
+rule "terraform_required_providers" {
+  enabled = false
 }

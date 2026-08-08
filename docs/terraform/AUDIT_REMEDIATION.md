@@ -25,7 +25,7 @@ All **Critical** and **High** audit findings have been remediated in code and do
 | C1 | Remote backend not bootstrapped | Added `provision-state-storage.sh`; documented bootstrap in `deployment/bootstrap/README.md` and `docs/cicd/README.md` |
 | C2 | Azure OIDC not implemented | New composite action `.github/actions/azure-terraform`; apply/destroy workflows enabled with secret validation |
 | C3 | `managed-identity` `output.id` returned `client_id` | Fixed to return ARM resource ID; `client_id` output unchanged |
-| C4 | Four empty legacy modules | Added `DEPRECATED.md` to `postgres`, `monitor`, `alerts`, `redis`; updated root README |
+| C4 | Four empty legacy modules | Added `DEPRECATED.md` to `postgres`, `monitor`, `alerts`; `redis` is now implemented for CCH AI |
 | C5 | Plans/drift without remote state | Plan and drift workflows use remote backend when `TF_STATE_*` secrets exist |
 | C6 | Prod governance ignores `enable_governance` | Gated `policy_initiative` and `policy_assignment` on `local.feature_flags.enable_governance` |
 

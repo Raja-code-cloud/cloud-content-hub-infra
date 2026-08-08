@@ -185,4 +185,65 @@ Monitor ingestion via Azure Cost Management and workspace usage metrics.
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_log_analytics_workspace.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_daily_quota_gb"></a> [daily\_quota\_gb](#input\_daily\_quota\_gb) | Daily ingestion quota in GB. Use -1 for unlimited (Azure default). Set a positive value to cap ingestion cost. | `number` | `1` | no |
+| <a name="input_internet_ingestion_enabled"></a> [internet\_ingestion\_enabled](#input\_internet\_ingestion\_enabled) | When true, allows ingestion of data from public internet sources. | `bool` | `true` | no |
+| <a name="input_internet_query_enabled"></a> [internet\_query\_enabled](#input\_internet\_query\_enabled) | When true, allows querying workspace data over the public internet. | `bool` | `true` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for the Log Analytics Workspace. | `string` | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group where the Log Analytics Workspace is created. | `string` | n/a | yes |
+| <a name="input_retention_in_days"></a> [retention\_in\_days](#input\_retention\_in\_days) | Data retention in days. Free SKU requires 7. Paid SKUs support 30-730. | `number` | `30` | no |
+| <a name="input_sku"></a> [sku](#input\_sku) | Log Analytics Workspace SKU. PerGB2018 is recommended for pay-as-you-go workloads. | `string` | `"PerGB2018"` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to the workspace. Pass merged tags from modules/common — never hardcode tags in this module. | `map(string)` | n/a | yes |
+| <a name="input_workspace_name"></a> [workspace\_name](#input\_workspace\_name) | Name of the Log Analytics Workspace. Must be supplied by the caller — this module does not generate names. | `string` | n/a | yes |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_customer_id"></a> [customer\_id](#output\_customer\_id) | The Customer ID (Workspace ID GUID) used by agents and diagnostic settings. |
+| <a name="output_id"></a> [id](#output\_id) | The Azure Resource Manager ID of the Log Analytics Workspace. |
+| <a name="output_name"></a> [name](#output\_name) | The name of the Log Analytics Workspace. |
+| <a name="output_primary_shared_key"></a> [primary\_shared\_key](#output\_primary\_shared\_key) | The primary shared key for Log Analytics agent and API authentication. Treat as confidential. |
+| <a name="output_retention_in_days"></a> [retention\_in\_days](#output\_retention\_in\_days) | Configured data retention period in days. |
+| <a name="output_secondary_shared_key"></a> [secondary\_shared\_key](#output\_secondary\_shared\_key) | The secondary shared key for Log Analytics agent and API authentication. Treat as confidential. |
+| <a name="output_sku"></a> [sku](#output\_sku) | Configured Log Analytics Workspace SKU. |
+| <a name="output_workspace"></a> [workspace](#output\_workspace) | Non-sensitive workspace metadata for downstream module composition. |
+| <a name="output_workspace_resource_id"></a> [workspace\_resource\_id](#output\_workspace\_resource\_id) | The Azure Resource Manager ID of the Log Analytics Workspace. |
 <!-- END_TF_DOCS -->

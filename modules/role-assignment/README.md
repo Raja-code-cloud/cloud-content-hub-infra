@@ -317,4 +317,54 @@ terraform import 'module.role_assignment.azurerm_role_assignment.this["identity-
 - [Provider Inheritance](../../docs/terraform/provider-inheritance.md)
 
 <!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
+
+## Modules
+
+## Modules
+
+No modules.
+
+## Resources
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
+
+## Inputs
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_assignments"></a> [assignments](#input\_assignments) | List of Azure RBAC role assignments. Each entry must include a stable key for for\_each identity at scale. | <pre>list(object({<br/>    key                              = string<br/>    principal_id                     = string<br/>    principal_type                   = optional(string)<br/>    scope                            = string<br/>    role_definition_name             = optional(string)<br/>    role_definition_id               = optional(string)<br/>    condition                        = optional(string)<br/>    condition_version                = optional(string)<br/>    skip_service_principal_aad_check = optional(bool, false)<br/>    description                      = optional(string)<br/>  }))</pre> | `[]` | no |
+
+## Outputs
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_assignment_ids"></a> [assignment\_ids](#output\_assignment\_ids) | Map of assignment keys to Azure role assignment resource IDs. |
+| <a name="output_assignments"></a> [assignments](#output\_assignments) | Non-sensitive role assignment metadata for downstream module composition. |
+| <a name="output_principal_ids"></a> [principal\_ids](#output\_principal\_ids) | Map of assignment keys to principal object IDs. |
+| <a name="output_role_definition_ids"></a> [role\_definition\_ids](#output\_role\_definition\_ids) | Map of assignment keys to resolved role definition IDs. |
+| <a name="output_role_names"></a> [role\_names](#output\_role\_names) | Map of assignment keys to resolved role definition names. |
+| <a name="output_scopes"></a> [scopes](#output\_scopes) | Map of assignment keys to assignment scopes. |
 <!-- END_TF_DOCS -->
