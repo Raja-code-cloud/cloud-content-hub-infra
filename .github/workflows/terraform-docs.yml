@@ -29,7 +29,7 @@ jobs:
       modules: ${{ steps.discover.outputs.modules }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Discover modules
         id: discover
@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install terraform-docs
         run: |
@@ -72,7 +72,7 @@ jobs:
 
       - name: Upload documentation report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: terraform-docs-${{ matrix.module }}
           path: modules/${{ matrix.module }}/README.md

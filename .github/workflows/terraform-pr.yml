@@ -147,7 +147,7 @@ jobs:
 
       - name: Upload PR validation summary
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pr-validation-summary-${{ github.run_id }}
           path: pr-validation-summary.md
