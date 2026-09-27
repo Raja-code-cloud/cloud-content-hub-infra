@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Validate OIDC and backend secrets
         run: |
@@ -93,7 +93,7 @@ jobs:
 
       - name: Download plan artifact
         if: inputs.use_plan_artifact != ''
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: tfplan-${{ inputs.environment }}-${{ inputs.use_plan_artifact }}
           path: environments/${{ inputs.environment }}
@@ -136,7 +136,7 @@ jobs:
 
       - name: Upload apply log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: apply-log-${{ inputs.environment }}-${{ github.run_id }}
           path: environments/${{ inputs.environment }}/

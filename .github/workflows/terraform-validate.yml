@@ -31,7 +31,7 @@ jobs:
       environments: ${{ steps.discover.outputs.environments }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Discover modules and environments
         id: discover
@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
         uses: ./.github/actions/setup-terraform
@@ -74,7 +74,7 @@ jobs:
 
       - name: Upload validation artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: validate-log-${{ matrix.environment }}
           path: ${{ runner.temp }}/validate-${{ matrix.environment }}.log
@@ -92,7 +92,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
         uses: ./.github/actions/setup-terraform
